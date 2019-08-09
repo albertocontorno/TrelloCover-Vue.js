@@ -1,0 +1,182 @@
+<template>
+    <div class="board">
+        <CardsContainer v-for="(container, index) in cardsContainers" :key="container.id" :iContainer="container" :index="index"
+            @addCard="onAddCard($event)"
+            @selectLabel="onSelectLabel($event)"
+            @edit-label="onEditLabel($event)"
+            @add-label="onAddNewLabel($event)"
+            @delete-label="onDeleteLabel($event)"
+        />
+        <div>
+            <AddNewContainer @add-list="onAddNewList($event)"/>
+        </div>
+    </div>
+</template>
+
+<script>
+import CardsContainer from '../components/CardsContainer'
+import AddNewContainer from '../components/AddNewContainer';
+import { LabelService } from  '../js/services/labels.service';
+export default {
+    name: 'Board',
+    components: {
+        CardsContainer,
+        AddNewContainer
+    },
+    provide: function() {
+        return {
+            labelsService: this.labelsService
+        }
+    },
+    inject: ['boardService', 'authService'],
+    data(){
+        return {
+            cardsContainers: [],
+            labelsService: new LabelService(),
+            labels: [],
+            board: null
+        }
+    },
+    methods:{
+        onAddCard(data){
+            console.log("ADD CARD: ", data);
+            let container = this.cardsContainers[data.container];
+            container.cards.push({
+                id: container.cards.length,
+                labels: [],
+                text: data.text
+            });
+            this.boardService.updateBoard(this.board, this.authService.user.info.uid);
+        },
+        onSelectLabel(data){
+            console.log("SELECT LABEL = ", data);
+            this.boardService.updateBoard(this.board, this.authService.user.info.uid);
+        },
+        onAddNewList(name){
+            this.cardsContainers.push(
+                {
+                    id: this.cardsContainers.length,
+                    title: name,
+                    cards: []
+                }
+            );
+            this.boardService.updateBoard(this.board, this.authService.user.info.uid);
+        },
+        onEditLabel(data){
+            console.log("MODIFY", data);
+             //console.warn("[LOG][ERROR - onEditLabel - Board.vue] Label Not Found.");
+            let label = data.label;
+            this.labelsService.modifyLabel(label.index, label.newName, label.newColor);
+        },
+        onAddNewLabel(data){
+            console.log("ADD", data);
+            let label = data.label;
+            this.labelsService.addLabel({text: label.newName, color: label.newColor});
+        },
+        onDeleteLabel(data){
+            console.log("DELETE LABEL", data);
+            this.labelsService.deleteLabel(data.label.index);
+        }
+    },
+    mounted(){
+        /* this.labelsService.labels.subscribe( (labels) => { this.labels = labels; } );
+        this.labelsService.loadLabels(); */
+        //TODO CARICARE LABEL DA DB
+        //TODO RENDERE SYNCH DATI E DB!
+        let id = this.$route.params.id;
+        console.log("open ", id);
+        this.boardService.readBoard(id, this.authService.user.info.uid).then( b => {
+            if(b){
+                this.board = {
+                    id: b.id,
+                    lists: b.lists,
+                    labels: b.labels,
+                };
+                //this.$router.push('/board/'+id);
+                this.cardsContainers = b.lists;
+                this.labelsService.labels.values = b.labels;
+                this.labelsService.update();
+                this.labels = b.labels;
+            }
+        });
+        
+        //TODO QUANDO CARICO LE CARD DEVO TRASFORMARE LE LABELS IN QUELLE REALI.
+/*         this.cardsContainers = [
+            {   
+                id: 0,
+                title: 'Title test 1',
+                cards: [
+                    {
+                        id: 12312,
+                        labels: [{text: 'label1', color: 'red'}],
+                        text: 'Lorem ipsum dolo sitLorem ipsum dolor sit amet.'
+                    },
+                    {   
+                        id: 12332,
+                        labels: [],
+                        text: 'Et harum quidem rerum facilis est et expedita distinctio.'
+                    }
+                ]
+            },
+
+
+            {
+                id: 1,
+                title: 'Title test 2',
+                cards: [
+                    {
+                        id: 12593,
+                        labels: [{text: 'label1', color: 'blue'}],
+                        text: 'Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.'
+                    },
+                    {   
+                        id: 12380,
+                        labels: [],
+                        text: 'Phasellus ac magna aliquam, sollicitudin orci a, vulputate arcu.'
+                    },
+                    {
+                        id: null,
+                        placeholder: true,
+                        style: { height: '40px' }
+                    }
+                ]
+            },
+
+
+            {
+                id: 2,
+                title: 'Title test 3',
+                cards: [
+                    {   
+                        id: 13352,
+                        labels: [{text: 'label1', color: 'yellow'},{text: 'label2', color: 'red'}],
+                        text: 'Et harum quidem rerum facilis est et expedita distinctio.'
+                    }
+                ]
+            },
+
+            {
+                id: null,
+                placeholder: true,
+                style: {height: '250px', backgroundColor: '#ccc'}
+            }
+        ] */
+    }
+}
+</script>
+
+<style scoped>
+.board{
+  display: flex;
+  overflow-x: auto;
+  /* flex-grow: 1; */
+  flex-direction: row;
+  position: absolute;
+  top: 10px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+</style>
+
+
