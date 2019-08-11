@@ -17,9 +17,6 @@
           <EditLabels v-if="showEditLabels" :iLabels="iLabels"
             @closeLabels="closeEditLabels()"
             @selectLabel="onSelectLabel($event)" 
-            @edit-label="onEditLabel($event)"
-            @add-label="onAddNewLabel($event)"
-            @delete-label="onDeleteLabel($event)"
           />
         </div>
         <div class="card-option-wrapper">
@@ -86,15 +83,6 @@ export default {
     stopPropagation(event){event.stopPropagation();},
     onSelectLabel(label){
       this.$emit('select-label', label);
-    },
-    onEditLabel(label){
-      this.$emit('edit-label', label);
-    },
-    onAddNewLabel(newLabel){
-      this.$emit('add-label', newLabel);
-    },
-    onDeleteLabel(label){
-      this.$emit('delete-label', label);
     }
   },
   mounted(){

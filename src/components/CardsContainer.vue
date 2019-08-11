@@ -7,13 +7,10 @@
         </div>
         <div>
             <template  v-for="(card, index) of iContainer.cards">
-                <Card v-if="!card.placeholder" :key="card.id" :iText="card.text" :iLabels="card.labels" :index="index"
-                    @selectLabel="onSelectLabel($event)"
-                    @edit-label="onEditLabel($event)"
-                    @add-label="onAddNewLabel($event)"
-                    @delete-label="onDeleteLabel($event)"
+                <Card v-if="!card.placeholder" :key="card.id" :index="index" :iCard="card"
+                    @save-board="onSaveBoard()"
                 />
-                <div v-if="card.placeholder" :style="card.style" class="container-card-placeholder"></div>
+                <div v-if="card.placeholder" :style="card.style" class="container-card-placeholder" :key="index"></div>
             </template>
             
             <div v-if="showAddCard">
@@ -66,17 +63,9 @@ export default {
             this.$emit('addCard', {container: this.index, text:this.newCardText});
             this.closeAddCard();
         },
-        onSelectLabel(data){
-            this.$emit('selectLabel', {...data, container: this.index});
-        },
-        onEditLabel(data){
-            this.$emit('edit-label', {...data, container: this.index});
-        },
-        onAddNewLabel(data){
-            this.$emit('add-label', {...data, container: this.index});
-        },
-        onDeleteLabel(data){
-            this.$emit('delete-label', {...data, container: this.index});
+        onSaveBoard(){
+            console.log("SAVE BOAR")
+            this.$emit('save-board');
         }
     }
 

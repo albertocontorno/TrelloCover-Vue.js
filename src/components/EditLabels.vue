@@ -68,7 +68,8 @@ export default {
             addLabel: false,
             btnEditLabel: '',
             labels: [],
-            editedIdLabel: null
+            editedIdLabel: null,
+            labelSubscription: null
         }
     },
     methods:{
@@ -91,15 +92,9 @@ export default {
         },
         onEditLabel(index){
             if(this.modifyLabel && this.editedLabel > -1){
-                this.$emit(
-                    "edit-label",
-                    {index: this.editedLabel, newName: this.labelName, newColor: this.labelColor, id: this.editedIdLabel}
-                );
+                this.labelsService.modifyLabel(this.editedLabel, this.labelName, this.labelColor);
             } else if(this.addLabel) {
-                this.$emit(
-                    "add-label",
-                    {index: this.editedLabel, newName: this.labelName, newColor: this.labelColor, id: this.editedIdLabel}
-                );
+                this.labelsService.addLabel({text: this.labelName, color: this.labelColor});
             }
             this.reset();
         },
@@ -119,10 +114,7 @@ export default {
             this.labelColor = color;
         },
         onDeleteLabel(){
-            this.$emit(
-                "delete-label",
-                {index: this.editedLabel, newName: this.labelName, newColor: this.labelColor, id: this.editedIdLabel}
-            );
+            this.labelsService.deleteLabel(this.editedLabel);
             this.reset();
         },
         reset(){
@@ -138,14 +130,17 @@ export default {
         this.onResizeSubscription = true;
         this.onResize();
         window.addEventListener('resize', this.onResize);
-        this.labelsService.labels.subscribe( labels => {
+        this.labelSubscription = this.labelsService.labels.subscribe( labels => {
             this.labels = labels;
-        } );
+        });
     },
     beforeDestroy(){
         if(this.onResizeSubscription){
             this.onResizeSubscription = false;
             window.removeEventListener('resize', this.onResize);
+        }
+        if(this.labelSubscription){
+            this.labelSubscription.unsubscribe();
         }
     }
 }

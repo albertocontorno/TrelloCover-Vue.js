@@ -8,8 +8,9 @@ export class Subject{
     subscribe(fn){
         this.subscribers.push(fn);
         if (this.immediate) {
-            return fn(this.values);
+            fn(this.values);
         }
+        return new Subscription(this.subscribers.length-1, this.subscribers);
     }
 
     notify(){
@@ -21,5 +22,16 @@ export class Subject{
         if (index > -1){
             this.subscribers.splice(index,1);
         }
+    }
+}
+
+class Subscription{
+    constructor(id, subscribers){
+        this.id = id;
+        this.subscribers = subscribers;
+    }
+
+    unsubscribe(){
+        this.subscribers.splice(this.id, 1);
     }
 }

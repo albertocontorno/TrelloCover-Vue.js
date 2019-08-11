@@ -4,6 +4,7 @@ export class BoardService{
 
     constructor(db) {
         if (!db) this.db = firebase.firestone();
+        this.currentBoardRef;
         this.db = db;
     }
 
@@ -17,7 +18,7 @@ export class BoardService{
                 .then( async res => {
                     await this.db.collection('boards').doc(uid.trim()).collection('boards').doc(nb.id).set(Object.assign({}, nb))
                     .then( async s => {
-                        //TODO AGGIUNGERE ALLE BOARDS DEL CLIENTE CON FUNCTION FIREBASE
+                        //AGGIUNGERE ALLE BOARDS DEL CLIENTE CON FUNCTION FIREBASE
                         await this.db.collection('users').doc(uid.trim()).update({
                             "boards": firebase.firestore.FieldValue.arrayUnion({id: nb.id, title: nb.title})
                         })
@@ -56,6 +57,7 @@ export class BoardService{
         await this.db.collection('boards').doc(uid).collection('boards').where('id', '==', id).get().then( boards => {
             console.log(board);
             boards.forEach( b => {
+                this.currentBoardRef = b;
                 board = b.data();
                 console.log('??????', board);
             });

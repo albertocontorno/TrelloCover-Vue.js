@@ -5,19 +5,17 @@
 >
     <div class="card-body" v-on:click="openAdvancedEdit()">
         <div class="card-labels">
-            <Label v-for="(label, index) in labels" v-bind:key="index" v-bind:text="label.text" v-bind:color="label.color"/>
+            <Label v-for="(label, index) in iCard.labels" v-bind:key="index" v-bind:text="label.text" v-bind:color="label.color"/>
         </div>
         <div v-show="showOptionsButton" class="card-options" v-on:click="editCard($event)">
             <font-awesome-icon icon="pen"/>
         </div>
-        <div class="card-text">{{text}}</div>
+        <div class="card-text">{{iCard.text}}</div>
         <div class="card-footer"></div>
-        <CardEdit v-if="showEdit"  v-bind:iText="text" v-bind:iLabels="labels"
-            @close-edit="closeEdit()" @update-text="updateText($event)"
+        <CardEdit v-if="showEdit"  v-bind:iText="iCard.text" v-bind:iLabels="iCard.labels"
+            @close-edit="closeEdit()" 
+            @update-text="updateText($event)"
             @select-label="onSelectLabel($event)"
-            @edit-label="onEditLabel($event)"
-            @add-label="onAddNewLabel($event)"
-            @delete-label="onDeleteLabel($event)"
         />
     </div>
 </div>
@@ -32,33 +30,30 @@ var nextId = 0;
 
 export default {
     name: "Card",
-    props: ['iText', 'iLabels', 'index'],
+    props: ['iCard', 'index'],
     components:{
         Label,
         CardEdit
     },
     inject: ['labelsService'],
     mounted: function(){
+        this.labels = this.iCard.labels;
         this.modal = ModalController.getInstance();
-        if(this.labelsService.labels.values){
-            this.labelsService.labels.values.forEach( label => {
-                for(let i = 0; i<this.iLabels.length; i++){
-                    if(this.iLabels[i] === label.id){
-                        this.labels.push(label);
-                    }
-                }
-            })
-        }
+        this.labelsSubscriptions.push(this.labelsService.labels.subscribe(this.setupCardLabels));
+        this.labelsSubscriptions.push(this.labelsService.eventDispatcher.subscribe( 'delete-label', this.onDeleteLabel ));
+    },
+    beforeDestroy(){
+        if(this.labelsSubscriptions){ this.labelsSubscriptions.forEach( sub => sub.unsubscribe()); } 
     },
     data: function(){
         return {
-            text: this.iText,
             showOptionsButton: false,
             showEdit: false,
             id: 'card-' + nextId++,
             labels: [],
             showAdvancedOption: false,
             modal: null,
+            labelsSubscriptions: [],
         }
     },
     methods: {
@@ -77,7 +72,8 @@ export default {
             this.showEdit = false;
         },
         updateText($event){
-            this.text = $event;
+            this.iCard.text = $event;
+            this.$emit('save-board');
         },
         openAdvancedEdit(){
             //this.showAdvancedOption = true;
@@ -90,21 +86,32 @@ export default {
             } else {
                 this.labels.push(label); 
             }
-            //this.$emit('selectLabel', {label, card: this.index});
-        },
-        onEditLabel(label){
-            this.$emit('edit-label', {label, card: this.index});
-        },
-        onAddNewLabel(newLabel){
-            this.$emit('add-label', {label: newLabel, card: this.index});
+            this.$emit('save-board');
         },
         onDeleteLabel(label){
             const index = this.labels.findIndex( l => l.id === label.id);
             if(index >= 0){
                 this.labels.splice(index, 1);
             }
-            this.$emit('delete-label', {label, card: this.index});
+        },
+        setupCardLabels(){
+            console.log("SETUPPING LABELS")
+            if(this.labelsService.labels.values){
+                let labelsMap = {};
+                this.labels.forEach( l => {
+                    labelsMap[l.id] = l;
+                })
+                this.labels = [];
+                this.labelsService.labels.values.forEach( label => {
+                    if(labelsMap[label.id]){
+                        this.labels.push(label);
+                    }
+                })
+                this.iCard.labels = this.labels;
+                console.log(this.labels);
+            }
         }
+
     }
 }
 </script>

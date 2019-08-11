@@ -71,9 +71,16 @@ new Vue({
   },
   
   data:{
-    db: firebase.firestore(),
+    db: db,
     authService: new AuthService(db),
     boardService: new BoardService(db),
     utilsService: new UtilsService()
+  },
+  mounted(){
+    console.log("APP MOUNTED", this)
+    this.authService.db = this.db;
+    this.authService.vm = this;
+    this.boardService.db = this.db;
+    this.boardService.vm = this;
   }
 }).$mount("#app");

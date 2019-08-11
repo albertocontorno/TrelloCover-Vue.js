@@ -2,10 +2,7 @@
     <div class="board">
         <CardsContainer v-for="(container, index) in cardsContainers" :key="container.id" :iContainer="container" :index="index"
             @addCard="onAddCard($event)"
-            @selectLabel="onSelectLabel($event)"
-            @edit-label="onEditLabel($event)"
-            @add-label="onAddNewLabel($event)"
-            @delete-label="onDeleteLabel($event)"
+            @save-board="onSaveBoard()"
         />
         <div>
             <AddNewContainer @add-list="onAddNewList($event)"/>
@@ -32,7 +29,7 @@ export default {
     data(){
         return {
             cardsContainers: [],
-            labelsService: new LabelService(),
+            labelsService: new LabelService(this.boardService.db, this.boardService.vm),
             labels: [],
             board: null
         }
@@ -48,10 +45,6 @@ export default {
             });
             this.boardService.updateBoard(this.board, this.authService.user.info.uid);
         },
-        onSelectLabel(data){
-            console.log("SELECT LABEL = ", data);
-            this.boardService.updateBoard(this.board, this.authService.user.info.uid);
-        },
         onAddNewList(name){
             this.cardsContainers.push(
                 {
@@ -62,26 +55,11 @@ export default {
             );
             this.boardService.updateBoard(this.board, this.authService.user.info.uid);
         },
-        onEditLabel(data){
-            console.log("MODIFY", data);
-             //console.warn("[LOG][ERROR - onEditLabel - Board.vue] Label Not Found.");
-            let label = data.label;
-            this.labelsService.modifyLabel(label.index, label.newName, label.newColor);
-        },
-        onAddNewLabel(data){
-            console.log("ADD", data);
-            let label = data.label;
-            this.labelsService.addLabel({text: label.newName, color: label.newColor});
-        },
-        onDeleteLabel(data){
-            console.log("DELETE LABEL", data);
-            this.labelsService.deleteLabel(data.label.index);
+        onSaveBoard(){
+            this.boardService.updateBoard(this.board, this.authService.user.info.uid);
         }
     },
     mounted(){
-        /* this.labelsService.labels.subscribe( (labels) => { this.labels = labels; } );
-        this.labelsService.loadLabels(); */
-        //TODO CARICARE LABEL DA DB
         //TODO RENDERE SYNCH DATI E DB!
         let id = this.$route.params.id;
         console.log("open ", id);
