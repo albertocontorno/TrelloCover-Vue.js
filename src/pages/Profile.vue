@@ -8,7 +8,7 @@ export default {
     name: 'profile',
     data(){ 
         return {
-            username: 'username'
+            username: 'usernameTemp'
         }
     }
 }
