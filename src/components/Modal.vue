@@ -8,7 +8,10 @@
                         <div class="modal-header-icon left-icon"><font-awesome-icon icon="chalkboard"/></div>
                         <div class="modal-header-text">
                             <AutoresizeTextarea v-model="text" classes="font-bold font-20"/>
-                            <div class="modal-header-text-sub">in lista adsdsd</div>
+                            <div class="modal-header-text-sub">in lista {{listTitle}}</div>
+                            <div class="modal-header-labels">
+                                <Label v-for="label of labels" :key="label.id" v-bind:text="label.text" v-bind:color="label.color"/>
+                            </div>
                             <span class="modal-header-close" v-on:click="hide($event)"><font-awesome-icon icon="times"/></span> 
                         </div>
                     </div>
@@ -19,9 +22,11 @@
                             <div class="modal-body-left-row-left"><font-awesome-icon class="left-icon" icon="align-left"/></div>
                             <div class="modal-body-left-row-right">
                                 Description
-                                <div class="modal-gray-area" v-on:click="addMoreDetails()" v-if="!showMoreDetails">Add a more detailed description...</div>
+                                <div class="modal-gray-area" v-on:click="addMoreDetails()" v-if="!showMoreDetails && !detail">Add a more detailed description...</div>
+                                <div class="modal-gray-area" v-on:click="addMoreDetails(detail)" v-if="!showMoreDetails && detail">{{detail}}</div>
+
                                 <div v-if="showMoreDetails">
-                                    <AutoresizeTextarea class="modal-comment" v-model="detail"/>
+                                    <AutoresizeTextarea class="modal-comment" v-model="detail" iAutoFocus="true"/>
                                     <div>
                                         <Button label="Save" classes="success" />
                                         <font-awesome-icon icon="times" class="modal-close-more-details" v-on:click="closeMoreDetails()"/>
@@ -41,6 +46,12 @@
                                 <AutoresizeTextarea class="modal-comment" v-model="comment"/>
                                 <!-- <button class="button success">Save</button> -->
                                 <Button label="Save" classes="success" />
+                            </div>
+                        </div>
+                        <div class="modal-body-left-row no-margin-bottom">
+                            <div class="modal-body-left-row-left"><font-awesome-icon class="left-icon" icon="list"/></div>
+                            <div class="modal-body-left-row-right">
+                                <CheckList/>
                             </div>
                         </div>
                         <div class="modal-body-left-row no-margin-bottom">
@@ -86,47 +97,63 @@
 import {ModalController} from '../js/modalController.js';
 import AutoresizeTextarea from './AutoresizeTextarea';
 import UserBadge from './UserBadge';
+import CheckList from './CheckList';
 import ActivityLog from './ActivityLog';
 import Button from './Button';
+import Label from './Label';
 
 export default {
     name: "Modal",
     props: ['iUser'],
+    inject: ['modalsService'],
     data(){
         return {
-            show__: true,
+            show__: false,
             text: 'TestTestTestTestTestTestTestTestTestTestTestT',
             comment: '',
             //TODO
             user: {initials: 'AC', username: 'Alberto Contorno'},
             showMoreDetails: false,
-            detail: '',
-            controller: ModalController.getInstance()
+            detail: null,
+            listTitle: '',
+            labels: [],
+            controller: null
         }
     },
     components:{
         AutoresizeTextarea,
         UserBadge,
         ActivityLog,
-        Button
+        Button,
+        Label,
+        CheckList
     },
     methods: {
-        show(){
+        show(data){
             //this.textarea_listener();
+            console.log("OPEN MODAL", data);
             this.show__ = true;
         },
         hide($event){
             this.show__ = false;
             //this.text = 'TestTestTestTestTestTest';
-            $event.stopPropagation();
+            if($event) $event.stopPropagation();
         },
         intercept($event){
-            $event.stopPropagation();
+            if($event) $event.stopPropagation();
         },
-        toggle(){
+        toggle(data){
+            console.log("TOGGLE MODAL", data);
             this.show__ = !this.show__;
+            this.text = data.text;
+            this.detail = data.description;
+            this.listTitle = data.listTitle;
+            this.labels = data.labels;
         },
-        addMoreDetails(){
+        addMoreDetails(detail){
+            /* if(detail){
+                this.detail = detail;
+            } */
             this.showMoreDetails = true;
         },
         closeMoreDetails(){
@@ -134,10 +161,10 @@ export default {
         }
     },
     mounted: function(){
-        this.controller.setModal(this);
+        this.controller = this.modalsService.registerModal('cardAdvancedEditModal', this);
     },
     beforeDestroy(){
-        this.controller.setModal(null);
+        this.modalsService.unregisterModal('cardAdvancedEditModal');
     }
 }
 </script>

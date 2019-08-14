@@ -7,7 +7,7 @@
         </div>
         <div>
             <template  v-for="(card, index) of iContainer.cards">
-                <Card v-if="!card.placeholder" :key="card.id" :index="index" :iCard="card"
+                <Card v-if="!card.placeholder" :key="card.id" :index="index" :iCard="card" :iListId="iContainer.id"
                     @save-board="onSaveBoard()"
                 />
                 <div v-if="card.placeholder" :style="card.style" class="container-card-placeholder" :key="index"></div>

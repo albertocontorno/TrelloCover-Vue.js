@@ -8,13 +8,13 @@ import {
    faPen, faTags, faUser, faArrowRight, faClone, faTrash, faEllipsisH, faTimes,
    faAlignLeft, faComment, faList, faChalkboard, faCheckSquare, faClock, faPaperclip,
    faCopy, faEye, faArchive, faShareAlt, faPlus, faCheck, faArrowLeft, faSearchLocation, 
-   faLocationArrow, faCogs
+   faLocationArrow, faCogs, faSquare
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { AuthService } from "./js/services/auth.service";
 import { BoardService } from "./js/services/board.service";
 import { UtilsService } from "./js/services/utils.service";
-
+import { ModalsService } from './js/services/modals.service.js';
 library.add(faPen);
 library.add(faTags);
 library.add(faUser);
@@ -40,6 +40,7 @@ library.add(faArrowLeft);
 library.add(faLocationArrow);
 library.add(faSearchLocation);
 library.add(faCogs);
+library.add(faSquare);
 
 Vue.component("font-awesome-icon", FontAwesomeIcon);
 
@@ -66,7 +67,8 @@ new Vue({
     return {
       authService: this.authService,
       boardService: this.boardService,
-      utilsService: this.utilsService
+      utilsService: this.utilsService,
+      modalsService: this.modalsService,
     }
   },
   
@@ -74,7 +76,8 @@ new Vue({
     db: db,
     authService: new AuthService(db),
     boardService: new BoardService(db),
-    utilsService: new UtilsService()
+    utilsService: new UtilsService(),
+    modalsService: new ModalsService()
   },
   mounted(){
     console.log("APP MOUNTED", this)

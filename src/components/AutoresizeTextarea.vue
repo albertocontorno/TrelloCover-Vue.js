@@ -4,13 +4,14 @@
         :value="iValue"
         v-on:input="$emit('input', $event.target.value)"
         :class="classes"
+        :autofocus="iAutoFocus"
     ></textarea>
 </template>
 
 <script>
 export default {
     name: "AutoresizeTextarea",
-    props: ['iValue', 'iInitialSize', 'classes'],
+    props: ['iValue', 'iInitialSize', 'classes', 'iAutoFocus'],
     model: {
         prop: 'iValue',
         event: 'input'

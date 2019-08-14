@@ -71,7 +71,7 @@ router.beforeEach((to, from, next) => {
                 next('/login');
             }
         } else {
-            router.app.authService = new AuthService();
+            //router.app.authService = new AuthService();
             next('/login');
         }
     }

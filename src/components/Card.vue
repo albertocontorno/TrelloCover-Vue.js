@@ -25,20 +25,18 @@
 <script>
 import Label from './Label';
 import CardEdit from './CardEdit';
-import {ModalController} from '../js/modalController.js';
 var nextId = 0;
 
 export default {
     name: "Card",
-    props: ['iCard', 'index'],
+    props: ['iCard', 'index', 'iListId'],
     components:{
         Label,
         CardEdit
     },
-    inject: ['labelsService'],
+    inject: ['labelsService', 'modalsService'],
     mounted: function(){
         this.labels = this.iCard.labels;
-        this.modal = ModalController.getInstance();
         this.labelsSubscriptions.push(this.labelsService.labels.subscribe(this.setupCardLabels));
         this.labelsSubscriptions.push(this.labelsService.eventDispatcher.subscribe( 'delete-label', this.onDeleteLabel ));
     },
@@ -77,7 +75,14 @@ export default {
         },
         openAdvancedEdit(){
             //this.showAdvancedOption = true;
-            this.modal.open();
+            //this.modal.open();
+            console.log("RETRIEVING " , this.iListId, ' -- ', this.iCard.id)
+            this.iCard.cardInfo.get().then( c => {
+                console.log("CARD RETRIEVED", c);
+                let infos = Object.assign({}, this.iCard, c.data());
+                this.modalsService.toggleModal('cardAdvancedEditModal', infos);
+            })
+            
         },
         onSelectLabel(label){
             const index = this.labels.findIndex( l => l.id === label.id);
