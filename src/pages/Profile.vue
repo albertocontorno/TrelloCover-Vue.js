@@ -5,6 +5,11 @@
 
 <script>
 export default {
-    name: 'profile'
+    name: 'profile',
+    data(){ 
+        return {
+            username: 'username'
+        }
+    }
 }
 </script>
