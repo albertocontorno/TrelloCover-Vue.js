@@ -7,18 +7,21 @@
         <div>
             <AddNewContainer @add-list="onAddNewList($event)"/>
         </div>
+        <Modal/>
     </div>
 </template>
 
 <script>
 import CardsContainer from '../components/CardsContainer'
 import AddNewContainer from '../components/AddNewContainer';
+import Modal from "../components/Modal";
 import { LabelService } from  '../js/services/labels.service';
 export default {
     name: 'Board',
     components: {
         CardsContainer,
-        AddNewContainer
+        AddNewContainer,
+        Modal
     },
     provide: function() {
         return {

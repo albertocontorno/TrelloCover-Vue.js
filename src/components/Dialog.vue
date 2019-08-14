@@ -3,8 +3,10 @@
         <div class="modal-container">
             <div clasS="modal-content" v-on:click="intercept($event)">
                 <div class="modal-header-title">
+                    {{text}}
                 </div>
                 <div class="modal-body">
+                    {{comment}}
                 </div>
             </div>
         </div>
@@ -20,15 +22,16 @@ export default {
     components:{
         Button
     },
+    inject: ['modalsService'],
     data(){
         return {
-            show__: true,
+            show__: false,
             text: 'TestTestTestTestTestTestTestTestTestTestTestT',
             comment: '',
             user: {initials: 'AC', username: 'Alberto Contorno'},
             showMoreDetails: false,
             detail: '',
-            controller: ModalController.getInstance()
+            controller: new ModalController()
         }
     },
     methods: {
@@ -39,13 +42,16 @@ export default {
         hide($event){
             this.show__ = false;
             //this.text = 'TestTestTestTestTestTest';
-            $event.stopPropagation();
+            if($event) $event.stopPropagation();
         },
         intercept($event){
-            $event.stopPropagation();
+            if($event) $event.stopPropagation();
         },
-        toggle(){
+        toggle(data){
             this.show__ = !this.show__;
+            this.text = data.text;
+            this.comment = data.comment;
+
         },
         addMoreDetails(){
             this.showMoreDetails = true;
@@ -55,10 +61,10 @@ export default {
         }
     },
     mounted: function(){
-        this.controller.setModal(this);
+        this.controller = this.modalsService.registerModal('mainDialog', this);
     },
     beforeDestroy(){
-        this.controller.setModal(null);
+        this.modalsService.unregisterModal('mainDialog');
     }
 }
 </script>

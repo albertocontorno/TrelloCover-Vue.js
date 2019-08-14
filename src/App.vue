@@ -3,30 +3,30 @@
     <div class="main-container">
       <!-- <div class="nav">NEXT NAVBAR</div> -->
       <Navbar @logout="logout()"/>
-      
+
       <div class="sub-container">
         <!-- <Board/> -->
         <router-view/>
       </div>
     </div>
-    <Modal/>
+    <Dialog/>
   </div>
 </template>
 
 <script>
 import {AuthService} from "./js/services/auth.service";
 import Navbar from "./components/Navbar";
-import Modal from "./components/Modal";
 import CardsContainer from "./components/CardsContainer";
+import Dialog from "./components/Dialog";
 
 export default {
   name: "App",
   components: {
     Navbar,
     CardsContainer,
-    Modal
+    Dialog
   },
-  inject: ['authService'],
+  inject: ['authService', 'modalsService'],
   data(){
     return {
       

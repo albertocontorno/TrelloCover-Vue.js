@@ -37,7 +37,7 @@ export default {
     inject: ['authService'],
     data(){
         return {
-            email: '',
+            email: 'test@test.com',
             password: '',
             showError: false
         }

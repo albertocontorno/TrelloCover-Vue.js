@@ -1,20 +1,8 @@
-var instance = null;
 export class ModalController{
     
     constructor(){
         this.isOpen = false;
-        this.text = '';
         this.modal = null;
-        instance = this;
-    }
-
-    static getInstance(){
-        if (instance){
-            return instance;
-        } else {
-            instance = new ModalController();
-            return instance;
-        }
     }
 
     setModal(modal){
@@ -36,8 +24,11 @@ export class ModalController{
         }
     }
 
-    toggle(){
+    toggle(data){
         this.isOpen = !this.isOpen;
+        if (this.modal) {
+            this.modal.toggle(data);
+        }
     }
 
     setOpen( open ){
