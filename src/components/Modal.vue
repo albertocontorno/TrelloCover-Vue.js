@@ -48,10 +48,10 @@
                                 <Button label="Save" classes="success" />
                             </div>
                         </div>
-                        <div class="modal-body-left-row no-margin-bottom">
+                        <div class="modal-body-left-row no-margin-bottom"  v-for="(checklist, index) of checkLists" :key="index">
                             <div class="modal-body-left-row-left"><font-awesome-icon class="left-icon" icon="list"/></div>
                             <div class="modal-body-left-row-right">
-                                <CheckList/>
+                                <CheckList :iItems="checklist.items" :iTitle="checklist.title"/>
                             </div>
                         </div>
                         <div class="modal-body-left-row no-margin-bottom">
@@ -117,7 +117,8 @@ export default {
             detail: null,
             listTitle: '',
             labels: [],
-            controller: null
+            checkLists: [],
+            controller: null,
         }
     },
     components:{
@@ -162,6 +163,19 @@ export default {
     },
     mounted: function(){
         this.controller = this.modalsService.registerModal('cardAdvancedEditModal', this);
+        this.checkLists.push(
+            {items: [
+                {text: 'todo 1 asdasd adsdasd ', done: true},
+                {text: 'todo 2 asd dsd d adsdasd ', done: true},
+                {text: 'todo 3 353 adsd fdfd3sd ', done: false},
+                {text: 'todo 4 sdg4 adsdf asd ', done: true},
+                {text: 'todo 4 sdg4 adsdf asd ', done: false},
+            ], title: 'Test CheckList 1'}
+        );
+        this.checkLists.push({items: [
+                {text: 'w 2321 eee adsdasd ', done: false},
+                {text: 'fef 21312 adsdasd ', done: true},
+            ], title: 'Test CheckList 2'});
     },
     beforeDestroy(){
         this.modalsService.unregisterModal('cardAdvancedEditModal');

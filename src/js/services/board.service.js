@@ -1,5 +1,5 @@
 import firebase from "firebase";
-
+import {CardInfo} from "../model/CardInfo";
 export class BoardService{
 
     constructor(db) {
@@ -75,6 +75,27 @@ export class BoardService{
         this.db.collection('boards').doc(uid.trim()).collection('boards').doc(b.id).update(b)
         .then( res => console.log('upadate board ', b.id))
         .catch ( err => console.log('error updating board ', b.id, err));
+    }
+
+    addCardToList(listId, card, boardId, uid, lists, list){
+        console.log(listId, card, boardId, uid, lists)
+        let cardInfoObj = new CardInfo();
+        cardInfoObj.activities.push({date: firebase.firestore.Timestamp.fromDate(new Date()), description: 'Card Created', user: uid});
+        cardInfoObj.listId = listId;
+        cardInfoObj.listTitle = list.title;
+        cardInfoObj.members.push(uid);
+        cardInfoObj.id = ''+listId+card.id;
+        cardInfoObj = JSON.parse(JSON.stringify(cardInfoObj));
+        this.db.collection('boards').doc(uid.trim()).collection('boards').doc(boardId).collection('cardsInfo').doc(''+listId+card.id).set(cardInfoObj).then(
+            v => {
+                this.db.collection('boards').doc(uid.trim()).collection('boards').doc(boardId).collection('cardsInfo').doc(''+listId+card.id).get()
+                .then( v2 => {
+                    console.log(v2.ref);
+                    card.cardInfo = v2.ref;
+                    this.db.collection('boards').doc(uid.trim()).collection('boards').doc(boardId).update({'lists': lists});
+                })
+            }
+        );        
     }
 
     deleteBoard(id){

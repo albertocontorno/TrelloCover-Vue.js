@@ -41,12 +41,21 @@ export default {
         onAddCard(data){
             console.log("ADD CARD: ", data);
             let container = this.cardsContainers[data.container];
-            container.cards.push({
+            let newCard = {
                 id: container.cards.length,
                 labels: [],
                 text: data.text
-            });
-            this.boardService.updateBoard(this.board, this.authService.user.info.uid);
+            };
+            container.cards.push(newCard);
+            //this.boardService.updateBoard({lists:this.board.lists, id: this.board.id}, this.authService.user.info.uid);
+            this.boardService.addCardToList(
+                data.container, 
+                newCard,
+                this.board.id,
+                this.authService.user.info.uid,
+                this.board.lists,
+                container
+            );
         },
         onAddNewList(name){
             this.cardsContainers.push(
@@ -56,10 +65,10 @@ export default {
                     cards: []
                 }
             );
-            this.boardService.updateBoard(this.board, this.authService.user.info.uid);
+            this.boardService.updateBoard(this.board.lists, this.authService.user.info.uid);
         },
         onSaveBoard(){
-            this.boardService.updateBoard(this.board, this.authService.user.info.uid);
+            //this.boardService.updateBoard(this.board, this.authService.user.info.uid);
         }
     },
     mounted(){
@@ -78,7 +87,7 @@ export default {
                 this.labelsService.labels.values = b.labels;
                 this.labelsService.update();
                 this.labels = b.labels;
-            }
+            }            
         });
         
         //TODO QUANDO CARICO LE CARD DEVO TRASFORMARE LE LABELS IN QUELLE REALI.

@@ -18,7 +18,6 @@ import {AuthService} from "./js/services/auth.service";
 import Navbar from "./components/Navbar";
 import CardsContainer from "./components/CardsContainer";
 import Dialog from "./components/Dialog";
-
 export default {
   name: "App",
   components: {
@@ -89,6 +88,10 @@ label{
   margin-right: 5px;
 }
 
+.margin-t--5{
+  margin-top: -5px;
+}
+
 .icon-right{
   margin-right: 5px;
 }
@@ -131,6 +134,10 @@ label{
 
 .w-100{
   width: 100% !important;
+}
+
+.clickable{
+  cursor: pointer;
 }
 
 /**ROW COL**/

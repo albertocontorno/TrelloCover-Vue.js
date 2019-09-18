@@ -20,9 +20,6 @@ export default {
 
 <style>
 .progressbar-start-label{
-    display: flex;
-    float: left;
-    flex-grow: 0;
     font-size: 14px;
     align-items: center;
 }
@@ -38,7 +35,6 @@ export default {
 .progress-bar{
     height: 10px;
     border-radius: 5px;
-    float: left;
     position: absolute;
 }
 
@@ -48,14 +44,16 @@ export default {
 }
 
 .progressbar-bar-progress{
-    background-color: #00ff3f;
-    width: 9%;
+    background-color: #00ca32;
+    width: 0;
 }
 
 .progressbar-end-label{
-    display: flex;
-    flex-grow: 0;
     align-items: center;
     font-size: 14px;    
+}
+
+.col-xs-12{
+    padding: 0;
 }
 </style>
