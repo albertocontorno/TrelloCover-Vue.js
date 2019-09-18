@@ -102,5 +102,20 @@ export class BoardService{
 
     }
 
+    getBoardLists(id, uid){
+        console.log('GETTING cards')
+        // /boards/KpvCvc53laUBqlRzxAjDebAXNdW2/boards/9fcd6062-7b7a-44f6-9f8d-2d78e3febd83
+        this.db.collection('boards').doc(uid.trim()).collection('boards').doc(id).collection('cards').get()
+            .then(lists => console.log("cards", lists))
+    }
+
+    /*
+    -to take all cards of a list 
+        /boards/KpvCvc53laUBqlRzxAjDebAXNdW2/boards/9fcd6062-7b7a-44f6-9f8d-2d78e3febd83/cards/0/cards
+    -Now lists have no cards into, only the info of the list
+    -Cards can be pointed individually direcly, to update text or labels, or delete them
+    -Cards info are still pointable individually and directly on demand (to retrieve and to update!).
+    */
+
 
 }
