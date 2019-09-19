@@ -51,9 +51,8 @@ export default {
             this.boardService.addCardToList(
                 data.container, 
                 newCard,
-                this.board.id,
+                this.board,
                 this.authService.user.info.uid,
-                this.board.lists,
                 container
             );
         },
@@ -69,6 +68,11 @@ export default {
         },
         onSaveBoard(){
             //this.boardService.updateBoard(this.board, this.authService.user.info.uid);
+        },
+        retrieveCards(boardId, lists){
+            lists.forEach( list => {
+                this.boardService.retrieveCardsOfList(boardId, list.id)
+            });
         }
     },
     mounted(){
@@ -79,8 +83,9 @@ export default {
             if(b){
                 this.board = {
                     id: b.id,
-                    lists: b.lists,
+                    lists: this.retrieveCards(b.id, b.lists),
                     labels: b.labels,
+                    members: b.members
                 };
                 //this.$router.push('/board/'+id);
                 this.cardsContainers = b.lists;

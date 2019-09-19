@@ -85,5 +85,6 @@ new Vue({
     this.authService.vm = this;
     this.boardService.db = this.db;
     this.boardService.vm = this;
+    this.boardService.utils = this.utilsService;
   }
 }).$mount("#app");
