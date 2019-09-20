@@ -71,18 +71,16 @@ export default {
         },
         updateText($event){
             this.iCard.text = $event;
-            this.$emit('save-board');
+            //this.$emit('save-board');
+            this.$emit('save-card', this.iCard);
         },
         openAdvancedEdit(){
             //this.showAdvancedOption = true;
             //this.modal.open();
-            console.log("RETRIEVING " , this.iListId, ' -- ', this.iCard.id)
             this.iCard.cardInfo.get().then( c => {
-                console.log("CARD RETRIEVED", c);
                 let infos = Object.assign({}, this.iCard, c.data());
                 this.modalsService.toggleModal('cardAdvancedEditModal', infos);
-            })
-            
+            });
         },
         onSelectLabel(label){
             const index = this.labels.findIndex( l => l.id === label.id);
@@ -100,11 +98,10 @@ export default {
             }
         },
         setupCardLabels(){
-            console.log("SETUPPING LABELS")
             if(this.labelsService.labels.values){
                 let labelsMap = {};
                 this.labels.forEach( l => {
-                    labelsMap[l.id] = l;
+                    labelsMap[(l.id != null)? l.id : l] = true;
                 })
                 this.labels = [];
                 this.labelsService.labels.values.forEach( label => {
@@ -113,7 +110,6 @@ export default {
                     }
                 })
                 this.iCard.labels = this.labels;
-                console.log(this.labels);
             }
         }
 

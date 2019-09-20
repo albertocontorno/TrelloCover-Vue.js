@@ -65,10 +65,11 @@ export class BoardService{
         let boardId = board.id;
         this.db.collection('boards_v2').doc(boardId).collection('cardsInfo').doc(''+listId+card.id).set(cardInfoObj).then(
             v => {
-                this.db.collection('boards').doc(uid.trim()).collection('boards').doc(boardId).collection('cardsInfo').doc(''+listId+card.id).get()
+                this.db.collection('boards_v2').doc(boardId).collection('cardsInfo').doc(''+listId+card.id).get()
                 .then( v2 => {
-                    console.log(v2.ref);
-                    //card.cardInfo = v2.ref;
+                    card.cardInfo = v2.ref;
+                    let newLabels = card.labels.map( l => l.id);
+                    card.labels = newLabels;
                     this.db.collection('boards_v2').doc(boardId).collection('lists').doc(listId+'').collection('cards').doc(card.id+'').set(card);
                 })
             }
@@ -76,7 +77,8 @@ export class BoardService{
     }
 
     addListToBoard(board, list){
-        board.lists.push(list);
+        //TODO USE firebase.firestore.FieldValue.arrayUnion
+        //board.lists.push(list);
         const lists = board.lists;
         this.db.collection('boards_v2').doc(board.id).update({lists}).then(
             b => {
@@ -94,11 +96,18 @@ export class BoardService{
     }
 
     async retrieveCardsOfList(boardId, listId){
-        console.log("RETRIEVING CARDS");
-        await this.db.collection('boards_v2').doc(boardId).collection('lists').doc(listId+'').collection('cards').get().then( cards =>{
-            console.log("CARDS RETRIEVED",  cards);
-        });
+        return this.db.collection('boards_v2').doc(boardId).collection('lists').doc(listId+'').collection('cards').get()
     }
+
+    upadateCardText(boardId, card, list){
+        this.db.collection('boards_v2').doc(boardId).collection('lists').doc(list.id+'').collection('cards').doc(card.id+'').update({text: card.text});
+    }
+
+    /* spostaCards(board, list, cards, uid){
+        cards.forEach( card => {
+            this.addCardToList(list.id, card, board, uid, list)  
+        });
+    } */
 
     /*
     -to take all cards of a list 

@@ -3,6 +3,7 @@
         <CardsContainer v-for="(container, index) in cardsContainers" :key="container.id" :iContainer="container" :index="index"
             @addCard="onAddCard($event)"
             @save-board="onSaveBoard()"
+            @save-card="onSaveCard($event)"
         />
         <div>
             <AddNewContainer @add-list="onAddNewList($event)"/>
@@ -56,34 +57,42 @@ export default {
                 container
             );
         },
+        onSaveCard($event){
+            console.log("UPDATE CARD", $event);
+            this.boardService.upadateCardText(this.board.id, $event.card, $event.list);
+        },
         onAddNewList(name){
-            this.cardsContainers.push(
-                {
+            let newList = {
                     id: this.cardsContainers.length,
                     title: name,
                     cards: []
-                }
-            );
-            this.boardService.updateBoard(this.board.lists, this.authService.user.info.uid);
+                };
+            this.cardsContainers.push( newList );//SPOSTA IN SERVIZIO SE TUTTO VA BENE?
+            this.boardService.addListToBoard(this.board, newList);
         },
         onSaveBoard(){
             //this.boardService.updateBoard(this.board, this.authService.user.info.uid);
         },
-        retrieveCards(boardId, lists){
-            lists.forEach( list => {
-                this.boardService.retrieveCardsOfList(boardId, list.id)
+        async retrieveCards(boardId, lists){
+            lists.forEach( async list => {
+                list.cards = [];
+                let cards = await this.boardService.retrieveCardsOfList(boardId, list.id)
+                cards.forEach( c =>{
+                    list.cards.push(c.data());   
+                });
             });
+            return lists;
         }
     },
     mounted(){
         //TODO RENDERE SYNCH DATI E DB!
         let id = this.$route.params.id;
         console.log("open ", id);
-        this.boardService.readBoard(id, this.authService.user.info.uid).then( b => {
+        this.boardService.readBoard(id, this.authService.user.info.uid).then( async b => {
             if(b){
                 this.board = {
                     id: b.id,
-                    lists: this.retrieveCards(b.id, b.lists),
+                    lists: await this.retrieveCards(b.id, b.lists),
                     labels: b.labels,
                     members: b.members
                 };
