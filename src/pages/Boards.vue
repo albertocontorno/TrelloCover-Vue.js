@@ -71,6 +71,7 @@ export default {
         },
         deleteBoard(id){
              console.log("deleteBoard ", id);
+             this.boardService.deleteBoard(id, this.userInfo.boards, this.userInfo.uid);
         },
         optionsBoard(id){
              console.log("optionsBoard ", id);
@@ -81,7 +82,7 @@ export default {
         newBoard(create = false){
             if(create){
                 const id = this.utilsService.uuidv4();
-                let newBoard = new Board(id, 'admin', this.newTitle);
+                let newBoard = new Board(id, 'admin', this.newTitle, [], [], this.userInfo.uid);
                 console.log("create a new board");
                 this.boardService.createBoard(newBoard, this.userInfo.uid);
                 this.userInfo.boards.push(newBoard);

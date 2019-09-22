@@ -46,9 +46,22 @@ export class BoardService{
     }
 
     updateBoard(b){
-        this.db.collection('boards_v2').doc(b.id).update(b)
+        this.db.collection('boards_v2').doc(b.id).update(b) 
         .then( res => console.log('upadate board ', b.id))
         .catch ( err => console.log('error updating board ', b.id, err));
+    }
+
+    async deleteBoard(boardId, boards, uid){
+        let index = boards.findIndex( b => b.id == boardId );
+        await this.db.collection('boards_v2').doc(boardId).delete()
+            .then( async b => {
+                let toDelete = {id: boards[index].id, title: boards[index].title};
+                await this.db.collection('users').doc(uid.trim()).update({
+                    "boards": firebase.firestore.FieldValue.arrayRemove(toDelete)
+                })
+                    .then(res => boards.splice(index, 1))
+                    .catch(err => console.log('error updating user boards ', err));
+            });
     }
 
     addCardToList(listId, card, board, uid, list){
@@ -68,7 +81,7 @@ export class BoardService{
                 this.db.collection('boards_v2').doc(boardId).collection('cardsInfo').doc(''+listId+card.id).get()
                 .then( v2 => {
                     card.cardInfo = v2.ref;
-                    let newLabels = card.labels.map( l => l.id);
+                    let newLabels = card.labels.map( l => l.id );
                     card.labels = newLabels;
                     this.db.collection('boards_v2').doc(boardId).collection('lists').doc(listId+'').collection('cards').doc(card.id+'').set(card);
                 })
@@ -84,11 +97,7 @@ export class BoardService{
             b => {
                 this.db.collection('boards_v2').doc(board.id).collection('lists').doc(lists.length-1).set({});
             });
-    }
-
-    deleteBoard(id){
-
-    }
+    } 
 
     getBoardLists(id, uid){
         this.db.collection('boards').doc(uid.trim()).collection('boards').doc(id).collection('cards').get()
@@ -101,6 +110,16 @@ export class BoardService{
 
     upadateCardText(boardId, card, list){
         this.db.collection('boards_v2').doc(boardId).collection('lists').doc(list.id+'').collection('cards').doc(card.id+'').update({text: card.text});
+    }
+
+    updateCardLabels(boardId, card, list){
+        const labels = card.labels.map( l => l.id );
+        this.db.collection('boards_v2').doc(boardId).collection('lists').doc(list.id+'').collection('cards').doc(card.id+'').update({labels});
+    }
+
+    updateBoardLabels(boardId, labels){
+        console.log("UPDATE BOARD LABELS");
+        this.db.collection('boards_v2').doc(boardId).update({labels});
     }
 
     /* spostaCards(board, list, cards, uid){

@@ -149,6 +149,9 @@ label{
     padding-bottom: 0.2rem;
     padding-top: 0.2rem;
 }
+.row{
+  max-width: 100%;
+}
 
 /* REMOVE */
 .nav{

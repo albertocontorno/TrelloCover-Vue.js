@@ -17,32 +17,30 @@ export class LabelService{
     }
 
     addLabel(label){
-        //Save Label on server
         label.id = this.labels.values.length;
         this.labels.values.push(label);
         this.sortLabels('color');
         this.eventDispatcher.notify('add-label', label);
-        /* this.db.collection('users').doc(uid.trim()).update({
-            "boards": firebase.firestore.FieldValue.arrayUnion({id: nb.id, title: nb.title})
-        }) */
-        console.log("");
         this.update();
+        return true;
     }
 
     modifyLabel(index, text, color){
-        //Save Label on server
         let label = this.labels.values[index];
         if(!label) return false;
         label.text = text;
         label.color = color;
         this.sortLabels('color');
+        this.eventDispatcher.notify('edit-label', label);
+        this.update();
         return true;
     }
 
     deleteLabel(index){
-        //Save Label on server
-        this.labels.values.splice(index, 1);
+        let deletedLabeld = this.labels.values.splice(index, 1)[0];
+        this.eventDispatcher.notify('delete-label', deletedLabeld);
         this.update();
+        return true;
     }
 
     sortLabels(attr){

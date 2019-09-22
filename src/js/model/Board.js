@@ -11,12 +11,13 @@ export class Board{
      * @param {string} owner 
      * @param {string} title 
      */
-    constructor(id, owner, title, containers, labels){
+    constructor(id, owner, title, containers, labels, uid){
         this.id = id;
         this.lists = containers || [];
         this.labels = labels || [];
         this.owner = owner || '';
         this.title = title || '';
+        this.members = [uid];
     }
 
 }

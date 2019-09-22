@@ -35,14 +35,6 @@ export default {
         CardEdit
     },
     inject: ['labelsService', 'modalsService'],
-    mounted: function(){
-        this.labels = this.iCard.labels;
-        this.labelsSubscriptions.push(this.labelsService.labels.subscribe(this.setupCardLabels));
-        this.labelsSubscriptions.push(this.labelsService.eventDispatcher.subscribe( 'delete-label', this.onDeleteLabel ));
-    },
-    beforeDestroy(){
-        if(this.labelsSubscriptions){ this.labelsSubscriptions.forEach( sub => sub.unsubscribe()); } 
-    },
     data: function(){
         return {
             showOptionsButton: false,
@@ -53,6 +45,16 @@ export default {
             modal: null,
             labelsSubscriptions: [],
         }
+    },
+    mounted: function(){
+        this.labels = this.iCard.labels;
+        //this.labelsSubscriptions.push(this.labelsService.labels.subscribe(this.setupCardLabels));
+        this.setupCardLabels();
+        this.labelsSubscriptions.push(this.labelsService.eventDispatcher.subscribe( 'add-label', this.setupCardLabels ));
+        this.labelsSubscriptions.push(this.labelsService.eventDispatcher.subscribe( 'delete-label', this.onDeleteLabel ));
+    },
+    beforeDestroy(){
+        if(this.labelsSubscriptions){ this.labelsSubscriptions.forEach( sub => sub.unsubscribe()); } 
     },
     methods: {
         mouseEnter: function(){
@@ -71,7 +73,6 @@ export default {
         },
         updateText($event){
             this.iCard.text = $event;
-            //this.$emit('save-board');
             this.$emit('save-card', this.iCard);
         },
         openAdvancedEdit(){
@@ -83,19 +84,21 @@ export default {
             });
         },
         onSelectLabel(label){
+            console.log("LABEL SELECTED")
             const index = this.labels.findIndex( l => l.id === label.id);
             if(index >= 0){
                 this.labels.splice(index, 1);
             } else {
                 this.labels.push(label); 
             }
-            this.$emit('save-board');
+            this.$emit('save-card-labels', this.iCard);
         },
         onDeleteLabel(label){
-            const index = this.labels.findIndex( l => l.id === label.id);
+            const index = this.labels.findIndex( l => l.id === label.id );
             if(index >= 0){
                 this.labels.splice(index, 1);
             }
+            this.$emit('save-card-labels', this.iCard);
         },
         setupCardLabels(){
             if(this.labelsService.labels.values){

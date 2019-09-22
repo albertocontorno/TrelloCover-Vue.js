@@ -10,6 +10,7 @@
                 <Card v-if="!card.placeholder" :key="card.id" :index="index" :iCard="card" :iListId="iContainer.id"
                     @save-board="onSaveBoard()"
                     @save-card="onSaveCard($event)"
+                    @save-card-labels="onSaveCardLabels($event)"
                 />
                 <div v-if="card.placeholder" :style="card.style" class="container-card-placeholder" :key="index"></div>
             </template>
@@ -71,6 +72,10 @@ export default {
         onSaveCard(card){
             console.log("SAVE CARD")
             this.$emit('save-card', {card: card, list: this.iContainer});
+        },
+        onSaveCardLabels(card){
+            console.log("SAVE CARD LABELS")
+            this.$emit('save-card-labels', {card: card, list: this.iContainer});
         }
     }
 

@@ -4,6 +4,7 @@
             @addCard="onAddCard($event)"
             @save-board="onSaveBoard()"
             @save-card="onSaveCard($event)"
+            @save-card-labels="onSaveCardLabels($event)"
         />
         <div>
             <AddNewContainer @add-list="onAddNewList($event)"/>
@@ -57,9 +58,12 @@ export default {
                 container
             );
         },
-        onSaveCard($event){
-            console.log("UPDATE CARD", $event);
-            this.boardService.upadateCardText(this.board.id, $event.card, $event.list);
+        onSaveCard(data){
+            console.log("UPDATE CARD", data);
+            this.boardService.upadateCardText(this.board.id, data.card, data.list);
+        },
+        onSaveCardLabels(data){
+            this.boardService.updateCardLabels(this.board.id, data.card, data.list);
         },
         onAddNewList(name){
             let newList = {
@@ -101,7 +105,8 @@ export default {
                 this.labelsService.labels.values = b.labels;
                 this.labelsService.update();
                 this.labels = b.labels;
-            }            
+                this.labelsService.labels.subscribe( labels => this.boardService.updateBoardLabels(this.board.id, labels) );
+            }
         });
         
         //TODO QUANDO CARICO LE CARD DEVO TRASFORMARE LE LABELS IN QUELLE REALI.
