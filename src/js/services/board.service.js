@@ -7,6 +7,7 @@ export class BoardService{
         this.currentBoardRef = null;
         this.db = db;
         this.utils = null;
+        this.currentBoardSubcriptions = [];
     }
 
     async createBoard(nb, uid){
@@ -37,12 +38,30 @@ export class BoardService{
             board = b.data();
         });
         //TODO TO REMOVE FROM HERE AND MANAGE PROPERLY
-        this.db.collection('boards_v2').doc(id)
-            .onSnapshot((doc) => {
-                console.log("BOARD CHANGEEEED", doc);
-        });
+        this.currentBoardSubcriptions.push( this.db.collection('boards_v2').doc(id)
+                .onSnapshot((doc) => {
+                    console.log("BOARD CHANGEEEED", doc);
+            })
+        );
+
+        this.currentBoardSubcriptions.push( this.db.collection('boards_v2').doc(id).collection('lists')
+                .onSnapshot((doc) => {
+                    console.log("LISTS CHANGEEEED", doc.docChanges(), doc.docs);
+                    doc.docChanges().forEach( d => console.log('[DOC CHANGED] ' + d.doc.id + ' - ' , d.doc.data()))
+            })
+        );
+
         console.log('returning', board);
         return board;
+    }
+
+    close(){
+        if(this.currentBoardSubcriptions) {
+            this.currentBoardSubcriptions.forEach( sub => {
+                sub();
+            });
+        }
+        this.currentBoardSubcriptions = [];
     }
 
     updateBoard(b){
@@ -51,9 +70,19 @@ export class BoardService{
         .catch ( err => console.log('error updating board ', b.id, err));
     }
 
+    /**
+     * Delete a board from user boards and set a board flag deleted to true. It then will notify all users with the board open
+     * and redirect them to a the boards list with the message that the board is deleted and at the same time it will be deleted
+     * from their list of boards.
+     * It is a logical delete. The real delete will happen with a server batch (???)
+     * Server side control all the board with flag deletede and delete them.
+     * @param {*} boardId 
+     * @param {*} boards 
+     * @param {*} uid 
+     */
     async deleteBoard(boardId, boards, uid){
         let index = boards.findIndex( b => b.id == boardId );
-        await this.db.collection('boards_v2').doc(boardId).delete()
+        await this.db.collection('boards_v2').doc(boardId).set({deleted: true})
             .then( async b => {
                 let toDelete = {id: boards[index].id, title: boards[index].title};
                 await this.db.collection('users').doc(uid.trim()).update({
@@ -81,8 +110,6 @@ export class BoardService{
                 this.db.collection('boards_v2').doc(boardId).collection('cardsInfo').doc(''+listId+card.id).get()
                 .then( v2 => {
                     card.cardInfo = v2.ref;
-                    let newLabels = card.labels.map( l => l.id );
-                    card.labels = newLabels;
                     this.db.collection('boards_v2').doc(boardId).collection('lists').doc(listId+'').collection('cards').doc(card.id+'').set(card);
                 })
             }
@@ -95,7 +122,7 @@ export class BoardService{
         const lists = board.lists;
         this.db.collection('boards_v2').doc(board.id).update({lists}).then(
             b => {
-                this.db.collection('boards_v2').doc(board.id).collection('lists').doc(lists.length-1).set({});
+                this.db.collection('boards_v2').doc(board.id).collection('lists').doc((lists.length-1)+'').set({});
             });
     } 
 

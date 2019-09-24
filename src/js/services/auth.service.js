@@ -73,10 +73,10 @@ export class AuthService{
             console.log(this.user.info);
         });
 
-        this.db.collection("users").doc("admin")
+        /* this.db.collection("users").doc("admin")
             .onSnapshot( (doc) => {
                 Object.assign(this.user.info, doc.data());
                 console.log("Current data: ", this.user.info);
-        });
+        }); */
     }
 }

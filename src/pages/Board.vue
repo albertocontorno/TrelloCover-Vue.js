@@ -170,6 +170,9 @@ export default {
                 style: {height: '250px', backgroundColor: '#ccc'}
             }
         ] */
+    },
+    beforeDestroy(){
+        this.boardService.close();
     }
 }
 </script>
