@@ -47,7 +47,7 @@ export default {
         }
     },
     mounted: function(){
-        this.labels = this.iCard.labels;
+        //this.labels = this.iCard.labels;
         //this.labelsSubscriptions.push(this.labelsService.labels.subscribe(this.setupCardLabels));
         this.setupCardLabels();
         this.labelsSubscriptions.push(this.labelsService.eventDispatcher.subscribe( 'add-label', this.setupCardLabels ));
@@ -85,34 +85,34 @@ export default {
         },
         onSelectLabel(label){
             console.log("LABEL SELECTED")
-            const index = this.labels.findIndex( l => l.id === label.id);
+            const index = this.iCard.labels.findIndex( l => l.id === label.id);
             if(index >= 0){
-                this.labels.splice(index, 1);
+                this.iCard.labels.splice(index, 1);
             } else {
-                this.labels.push(label); 
+                this.iCard.labels.push(label);
             }
             this.$emit('save-card-labels', this.iCard);
         },
         onDeleteLabel(label){
-            const index = this.labels.findIndex( l => l.id === label.id );
+            const index = this.iCard.labels.findIndex( l => l.id === label.id );
             if(index >= 0){
-                this.labels.splice(index, 1);
+                this.iCard.labels.splice(index, 1);
             }
             this.$emit('save-card-labels', this.iCard);
         },
         setupCardLabels(){
             if(this.labelsService.labels.values){
                 let labelsMap = {};
-                this.labels.forEach( l => {
+                this.iCard.labels.forEach( l => {
                     labelsMap[(l.id != null)? l.id : l] = true;
                 })
-                this.labels = [];
+                this.iCard.labels = [];
                 this.labelsService.labels.values.forEach( label => {
                     if(labelsMap[label.id]){
-                        this.labels.push(label);
+                        this.iCard.labels.push(label);
                     }
                 })
-                this.iCard.labels = this.labels;
+                //this.iCard.labels = this.labels;
             }
         }
 

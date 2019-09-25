@@ -78,12 +78,28 @@ export default {
             //this.boardService.updateBoard(this.board, this.authService.user.info.uid);
         },
         async retrieveCards(boardId, lists){
+            console.log("LISTE ", lists);
             lists.forEach( async list => {
                 list.cards = [];
                 let cards = await this.boardService.retrieveCardsOfList(boardId, list.id)
+                console.log("bhooooo", cards);
                 cards.forEach( c =>{
                     list.cards.push(c.data());   
                 });
+                this.boardService.currentBoardSubcriptions.push( cards.query.onSnapshot( l => {
+                    console.log("CARDS SNAPSHOT", l, l.docs.lengt, l.docChanges())
+                    l.docChanges().forEach( c =>{
+                         console.log("SINGLE CARD SNAP", c, c.doc, c.doc.data())
+                         const changedCard = c.doc.data();
+                         if(!this.board.lists[changedCard.listId]){
+                             this.board.lists[changedCard.listId] = {cards: []};
+                         }
+                         this.board.lists[changedCard.listId].cards[changedCard.id].text = changedCard.text;
+                         const newLabels = this.labelsService.transformCardLabels(changedCard.labels);
+                         this.board.lists[changedCard.listId].cards[changedCard.id].labels = newLabels;
+                    });
+                }));
+               
             });
             return lists;
         }

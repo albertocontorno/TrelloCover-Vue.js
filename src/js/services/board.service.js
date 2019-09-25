@@ -40,7 +40,8 @@ export class BoardService{
         //TODO TO REMOVE FROM HERE AND MANAGE PROPERLY
         this.currentBoardSubcriptions.push( this.db.collection('boards_v2').doc(id)
                 .onSnapshot((doc) => {
-                    console.log("BOARD CHANGEEEED", doc);
+                    board.labels = doc.data().labels; //TODO
+                    console.log("BOARD CHANGEEEED", doc, doc.data());
             })
         );
 
@@ -51,7 +52,14 @@ export class BoardService{
             })
         );
 
-        console.log('returning', board);
+        /* this.currentBoardSubcriptions.push( this.db.collection('boards_v2').doc(id).collection('cards')
+                .onSnapshot((doc) => {
+                    console.log("CARDS CHANGEEEED", doc.docChanges(), doc.docs);
+                    doc.docChanges().forEach( d => console.log('[DOC CHANGED] ' + d.doc.id + ' - ' , d.doc.data()))
+            })
+        ); */
+
+        console.log(`[READ BOARD (${id})]`, board);
         return board;
     }
 
@@ -103,6 +111,9 @@ export class BoardService{
         cardInfoObj.members.push(...board.members);
         cardInfoObj.id = ''+listId+card.id;
         cardInfoObj = JSON.parse(JSON.stringify(cardInfoObj));
+        card.members = [...board.members];
+        card.listId = listId;
+        card.position = card.id;
 
         let boardId = board.id;
         this.db.collection('boards_v2').doc(boardId).collection('cardsInfo').doc(''+listId+card.id).set(cardInfoObj).then(

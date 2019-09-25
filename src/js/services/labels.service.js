@@ -53,4 +53,20 @@ export class LabelService{
         });
     }
 
+    transformCardLabels(labels){
+        if(this.labels.values){
+            let labelsMap = {};
+            labels.forEach( l => {
+                labelsMap[(l.id != null)? l.id : l] = true;
+            })
+            let labelsForCard = [];
+            this.labels.values.forEach( label => {
+                if(labelsMap[label.id]){
+                    labelsForCard.push(label);
+                }
+            })
+            return labelsForCard;
+        }
+    }
+
 }
