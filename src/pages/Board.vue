@@ -87,16 +87,23 @@ export default {
                     list.cards.push(c.data());   
                 });
                 this.boardService.currentBoardSubcriptions.push( cards.query.onSnapshot( l => {
-                    console.log("CARDS SNAPSHOT", l, l.docs.lengt, l.docChanges())
+                    console.log("CARDS SNAPSHOT", l, l.docChanges())
                     l.docChanges().forEach( c =>{
                          console.log("SINGLE CARD SNAP", c, c.doc, c.doc.data())
                          const changedCard = c.doc.data();
                          if(!this.board.lists[changedCard.listId]){
                              this.board.lists[changedCard.listId] = {cards: []};
                          }
-                         this.board.lists[changedCard.listId].cards[changedCard.id].text = changedCard.text;
-                         const newLabels = this.labelsService.transformCardLabels(changedCard.labels);
-                         this.board.lists[changedCard.listId].cards[changedCard.id].labels = newLabels;
+                         if(!this.board.lists[changedCard.listId].cards[changedCard.id]){
+                             //this.board.lists[changedCard.listId].cards[changedCard.id] = changedCard;
+                             this.$set(this.board.lists[changedCard.listId].cards, changedCard.id, changedCard);
+                             /* const newLabels = this.labelsService.transformCardLabels(changedCard.labels);
+                             this.board.lists[changedCard.listId].cards[changedCard.id].labels = newLabels; */
+                         } else {
+                             this.board.lists[changedCard.listId].cards[changedCard.id].text = changedCard.text;
+                             const newLabels = this.labelsService.transformCardLabels(changedCard.labels);
+                             this.board.lists[changedCard.listId].cards[changedCard.id].labels = newLabels;
+                         }
                     });
                 }));
                
@@ -120,47 +127,25 @@ export default {
                 this.boardService.currentBoardSubcriptions.push(
                     this.boardService.currentBoardRef.ref.onSnapshot((doc) => {
                         console.log("BOARD CHANGED!", doc.data());
+                        //Labels
                         this.labelsService.labels.values = doc.data().labels;
                         this.labelsService.update();
-
+                        //lists //TODO gestire delete
                         let newLists = doc.data().lists;
                         let listMap = {};
                         this.board.lists.forEach( l => listMap[l.id] = l );
-                        newLists.forEach( l => {
+                        newLists.forEach( l => { //Manage the added listsd
                             if(listMap[l.id]){
-                                //Già esiste
+                                //Already exists
                                 listMap[l.id].title = l.title;
-                            } else {
+                            } else { //Added one
                                 this.cardsContainers.push( l );
                             }
                         });
+                        //New/Deleted Card
                     })
                 );
                 
-                /* this.boardService.currentBoardSubcriptions.push( this.boardService.currentBoardRef.ref.collection('lists')
-                        .onSnapshot((doc) => {
-                           let listMap = {};
-                           this.board.lists.forEach( l => listMap[l.id] = true );
-                            console.log("LISTS CHANGEEEED", doc.docChanges(), doc.docs);
-                            doc.docChanges().forEach( d => {
-                                console.log('[DOC CHANGED] ' + d.doc.id + ' - ' , d.doc.data())
-                                if(listMap[d.doc.id]){ //deleted ??
-
-                                } else{ //added ?
-                                    if(d.type === 'added'){
-                                        let newList = {
-                                            id: this.cardsContainers.length,
-                                            title: name,
-                                            cards: []
-                                        };
-                                        this.cardsContainers.push( newList );
-                                    } 
-                                }
-                            });
-                    })
-                ); */
-
-
                 //this.$router.push('/board/'+id);
                 this.cardsContainers = b.lists;
                 this.labelsService.labels.values = b.labels;

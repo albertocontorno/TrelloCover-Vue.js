@@ -78,7 +78,6 @@ export default {
             this.$emit('save-card-labels', {card: card, list: this.iContainer});
         }
     }
-
 }
 </script>
 
