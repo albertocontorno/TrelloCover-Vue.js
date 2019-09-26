@@ -75,38 +75,35 @@ export default {
             this.boardService.addListToBoard(this.board, newList);
         },
         onSaveBoard(){
-            //this.boardService.updateBoard(this.board, this.authService.user.info.uid);
+            console.log('Save board');
+        },
+        addListListener(cards){
+            this.boardService.currentBoardSubcriptions.push( cards.query.onSnapshot( l => {
+                //console.log("CARDS SNAPSHOT", l, l.docChanges())
+                l.docChanges().forEach( c =>{
+                        //console.log("SINGLE CARD SNAP", c, c.doc, c.doc.data())
+                        const changedCard = c.doc.data();
+                        if(!this.board.lists[changedCard.listId]){
+                            this.board.lists[changedCard.listId] = {cards: []};
+                        }
+                        if(!this.board.lists[changedCard.listId].cards[changedCard.id]){
+                            this.$set(this.board.lists[changedCard.listId].cards, changedCard.id, changedCard);
+                        } else {
+                            this.board.lists[changedCard.listId].cards[changedCard.id].text = changedCard.text;
+                            const newLabels = this.labelsService.transformCardLabels(changedCard.labels);
+                            this.board.lists[changedCard.listId].cards[changedCard.id].labels = newLabels;
+                        }
+                });
+            }));
         },
         async retrieveCards(boardId, lists){
-            console.log("LISTE ", lists);
             lists.forEach( async list => {
                 list.cards = [];
                 let cards = await this.boardService.retrieveCardsOfList(boardId, list.id)
-                console.log("bhooooo", cards);
                 cards.forEach( c =>{
                     list.cards.push(c.data());   
                 });
-                this.boardService.currentBoardSubcriptions.push( cards.query.onSnapshot( l => {
-                    console.log("CARDS SNAPSHOT", l, l.docChanges())
-                    l.docChanges().forEach( c =>{
-                         console.log("SINGLE CARD SNAP", c, c.doc, c.doc.data())
-                         const changedCard = c.doc.data();
-                         if(!this.board.lists[changedCard.listId]){
-                             this.board.lists[changedCard.listId] = {cards: []};
-                         }
-                         if(!this.board.lists[changedCard.listId].cards[changedCard.id]){
-                             //this.board.lists[changedCard.listId].cards[changedCard.id] = changedCard;
-                             this.$set(this.board.lists[changedCard.listId].cards, changedCard.id, changedCard);
-                             /* const newLabels = this.labelsService.transformCardLabels(changedCard.labels);
-                             this.board.lists[changedCard.listId].cards[changedCard.id].labels = newLabels; */
-                         } else {
-                             this.board.lists[changedCard.listId].cards[changedCard.id].text = changedCard.text;
-                             const newLabels = this.labelsService.transformCardLabels(changedCard.labels);
-                             this.board.lists[changedCard.listId].cards[changedCard.id].labels = newLabels;
-                         }
-                    });
-                }));
-               
+                this.addListListener(cards);
             });
             return lists;
         }
@@ -134,12 +131,21 @@ export default {
                         let newLists = doc.data().lists;
                         let listMap = {};
                         this.board.lists.forEach( l => listMap[l.id] = l );
-                        newLists.forEach( l => { //Manage the added listsd
+                        let newListMap = {};
+                        newLists.forEach( async l => { //Manage the added listsd
+                            newListMap[l.id] = l;
                             if(listMap[l.id]){
                                 //Already exists
                                 listMap[l.id].title = l.title;
                             } else { //Added one
                                 this.cardsContainers.push( l );
+                                let cards = await this.boardService.retrieveCardsOfList( this.board.id, l.id);
+                                this.addListListener(cards);
+                            }
+                        });
+                        this.board.lists.forEach( (l, index) => {
+                            if(!newListMap[l.id]){
+                                this.board.lists.splice(index, 1);
                             }
                         });
                         //New/Deleted Card

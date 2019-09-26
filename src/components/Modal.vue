@@ -134,6 +134,7 @@ export default {
             //this.textarea_listener();
             console.log("OPEN MODAL", data);
             this.show__ = true;
+            this.detail = data.description;
         },
         hide($event){
             this.show__ = false;
