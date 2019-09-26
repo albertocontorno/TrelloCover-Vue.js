@@ -116,6 +116,51 @@ export default {
                     labels: b.labels,
                     members: b.members
                 };
+
+                this.boardService.currentBoardSubcriptions.push(
+                    this.boardService.currentBoardRef.ref.onSnapshot((doc) => {
+                        console.log("BOARD CHANGED!", doc.data());
+                        this.labelsService.labels.values = doc.data().labels;
+                        this.labelsService.update();
+
+                        let newLists = doc.data().lists;
+                        let listMap = {};
+                        this.board.lists.forEach( l => listMap[l.id] = l );
+                        newLists.forEach( l => {
+                            if(listMap[l.id]){
+                                //Già esiste
+                                listMap[l.id].title = l.title;
+                            } else {
+                                this.cardsContainers.push( l );
+                            }
+                        });
+                    })
+                );
+                
+                /* this.boardService.currentBoardSubcriptions.push( this.boardService.currentBoardRef.ref.collection('lists')
+                        .onSnapshot((doc) => {
+                           let listMap = {};
+                           this.board.lists.forEach( l => listMap[l.id] = true );
+                            console.log("LISTS CHANGEEEED", doc.docChanges(), doc.docs);
+                            doc.docChanges().forEach( d => {
+                                console.log('[DOC CHANGED] ' + d.doc.id + ' - ' , d.doc.data())
+                                if(listMap[d.doc.id]){ //deleted ??
+
+                                } else{ //added ?
+                                    if(d.type === 'added'){
+                                        let newList = {
+                                            id: this.cardsContainers.length,
+                                            title: name,
+                                            cards: []
+                                        };
+                                        this.cardsContainers.push( newList );
+                                    } 
+                                }
+                            });
+                    })
+                ); */
+
+
                 //this.$router.push('/board/'+id);
                 this.cardsContainers = b.lists;
                 this.labelsService.labels.values = b.labels;
@@ -124,68 +169,6 @@ export default {
                 this.labelsService.labels.subscribe( labels => this.boardService.updateBoardLabels(this.board.id, labels) );
             }
         });
-        
-        //TODO QUANDO CARICO LE CARD DEVO TRASFORMARE LE LABELS IN QUELLE REALI.
-/*         this.cardsContainers = [
-            {   
-                id: 0,
-                title: 'Title test 1',
-                cards: [
-                    {
-                        id: 12312,
-                        labels: [{text: 'label1', color: 'red'}],
-                        text: 'Lorem ipsum dolo sitLorem ipsum dolor sit amet.'
-                    },
-                    {   
-                        id: 12332,
-                        labels: [],
-                        text: 'Et harum quidem rerum facilis est et expedita distinctio.'
-                    }
-                ]
-            },
-
-
-            {
-                id: 1,
-                title: 'Title test 2',
-                cards: [
-                    {
-                        id: 12593,
-                        labels: [{text: 'label1', color: 'blue'}],
-                        text: 'Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.'
-                    },
-                    {   
-                        id: 12380,
-                        labels: [],
-                        text: 'Phasellus ac magna aliquam, sollicitudin orci a, vulputate arcu.'
-                    },
-                    {
-                        id: null,
-                        placeholder: true,
-                        style: { height: '40px' }
-                    }
-                ]
-            },
-
-
-            {
-                id: 2,
-                title: 'Title test 3',
-                cards: [
-                    {   
-                        id: 13352,
-                        labels: [{text: 'label1', color: 'yellow'},{text: 'label2', color: 'red'}],
-                        text: 'Et harum quidem rerum facilis est et expedita distinctio.'
-                    }
-                ]
-            },
-
-            {
-                id: null,
-                placeholder: true,
-                style: {height: '250px', backgroundColor: '#ccc'}
-            }
-        ] */
     },
     beforeDestroy(){
         this.boardService.close();

@@ -1,4 +1,5 @@
 export class Subject{
+
     constructor(values, immediate = false){
         this.values = values;
         this.subscribers = [];
@@ -32,6 +33,7 @@ class Subscription{
     }
 
     unsubscribe(){
+        console.log('Unsubscribe from subject');
         this.subscribers.splice(this.id, 1);
     }
 }

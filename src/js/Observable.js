@@ -30,6 +30,7 @@ class Subscription{
     }
 
     unsubscribe(){
+        console.log('Unsubscribe from observable');
         this.subscribers.splice(this.id, 1);
     }
 }
