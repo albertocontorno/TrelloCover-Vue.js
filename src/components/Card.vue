@@ -48,8 +48,8 @@ export default {
     },
     mounted: function(){
         //this.labels = this.iCard.labels;
-        //this.labelsSubscriptions.push(this.labelsService.labels.subscribe(this.setupCardLabels));
-        this.setupCardLabels();
+        this.labelsSubscriptions.push(this.labelsService.labels.subscribe(this.setupCardLabels));
+        //this.setupCardLabels();
         this.labelsSubscriptions.push(this.labelsService.eventDispatcher.subscribe( 'add-label', this.setupCardLabels ));
         this.labelsSubscriptions.push(this.labelsService.eventDispatcher.subscribe( 'delete-label', this.onDeleteLabel ));
     },

@@ -89,6 +89,7 @@ export class BoardService{
         cardInfoObj.listTitle = list.title;
         cardInfoObj.members.push(...board.members);
         cardInfoObj.id = ''+listId+card.id;
+        cardInfoObj.cardId = card.id;
         cardInfoObj = JSON.parse(JSON.stringify(cardInfoObj));
         card.members = [...board.members];
         card.listId = listId;
@@ -129,14 +130,23 @@ export class BoardService{
         this.db.collection('boards_v2').doc(boardId).collection('lists').doc(list.id+'').collection('cards').doc(card.id+'').update({text: card.text});
     }
 
-    updateCardLabels(boardId, card, list){
+    updateCardLabels(boardId, card, listId){
         const labels = card.labels.map( l => l.id );
-        this.db.collection('boards_v2').doc(boardId).collection('lists').doc(list.id+'').collection('cards').doc(card.id+'').update({labels});
+        this.db.collection('boards_v2').doc(boardId).collection('lists').doc(listId+'').collection('cards').doc(card.id+'').update({labels});
     }
 
     updateBoardLabels(boardId, labels){
         console.log("UPDATE BOARD LABELS");
         this.db.collection('boards_v2').doc(boardId).update({labels});
+    }
+
+    saveCardInfo(boardId, cardInfo, data){
+        let listId = cardInfo.listId;
+        let cardId = cardInfo.cardId;
+        this.db.collection('boards_v2').doc(boardId).collection('cardsInfo').doc(''+listId+cardId).update(data)
+            .then( res => {
+                console.log('cardInfo updated', res);
+            })
     }
 
     /* spostaCards(board, list, cards, uid){

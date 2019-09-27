@@ -155,7 +155,7 @@ export default {
     box-shadow: 1px 1px 3px 0px #000000cc;
     width: 100%;
     padding-bottom: 5px;
-
+    z-index: 50;
 }
 
 .card-option-edit-labels-header{

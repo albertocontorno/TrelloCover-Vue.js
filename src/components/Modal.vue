@@ -7,11 +7,11 @@
                     <div class="modal-header-title">
                         <div class="modal-header-icon left-icon"><font-awesome-icon icon="chalkboard"/></div>
                         <div class="modal-header-text">
-                            <AutoresizeTextarea v-model="text" classes="font-bold font-20"/>
+                            <AutoresizeTextarea v-model="text" classes="font-bold font-20" @blur="saveText()"/>
                             <div class="modal-header-text-sub">in lista {{listTitle}}</div>
                             <div class="modal-header-labels">
                                 <Label v-for="label of labels" :key="label.id" v-bind:text="label.text" v-bind:color="label.color"/>
-                                <div style="max-width: 250px; position: absolute; right: 0; left:0;"><EditLabels/></div>
+                                <div style="max-width: 250px; position: absolute; right: 0; left:0;"></div>
                             </div>
                             <span class="modal-header-close" v-on:click="hide($event)"><font-awesome-icon icon="times"/></span> 
                         </div>
@@ -29,7 +29,7 @@
                                 <div v-if="showMoreDetails">
                                     <AutoresizeTextarea class="modal-comment" v-model="detail" iAutoFocus="true"/>
                                     <div>
-                                        <Button label="Save" classes="success" />
+                                        <Button label="Save" classes="success" @click="onSaveDescription()"/>
                                         <font-awesome-icon icon="times" class="modal-close-more-details" v-on:click="closeMoreDetails()"/>
                                     </div>
                                 </div>
@@ -45,8 +45,7 @@
                             <div class="modal-body-left-row-left"><UserBadge :initials="user.initials" :username="user.username" /></div>
                             <div class="modal-body-left-row-right">
                                 <AutoresizeTextarea class="modal-comment" v-model="comment"/>
-                                <!-- <button class="button success">Save</button> -->
-                                <Button label="Save" classes="success" />
+                                <Button label="Save" classes="success"/>
                             </div>
                         </div>
                         <div class="modal-body-left-row no-margin-bottom"  v-for="(checklist, index) of checkLists" :key="index">
@@ -72,7 +71,10 @@
                         <div class="modal-body-buttons-title first">ADD TO CARD</div>
                         <ul class="modal-body-buttons-container">
                             <li><button class="modal-body-button"><font-awesome-icon class="icon-right" icon="user"/>Members</button></li>
-                            <li><button class="modal-body-button"><font-awesome-icon class="icon-right" icon="tags"/>Labels</button></li>
+                            <li>
+                                <EditLabels v-if="showEditLabels" :iLabels="labels" @closeLabels="closeEditLabels()" @selectLabel="onSelectLabel($event)"/>
+                                <button class="modal-body-button" @click="openEditLabels()"><font-awesome-icon class="icon-right" icon="tags"/>Labels</button>
+                            </li>
                             <li><button class="modal-body-button"><font-awesome-icon class="icon-right" icon="check-square"/>Checklist</button></li>
                             <li><button class="modal-body-button"><font-awesome-icon class="icon-right" icon="clock"/>Deadline</button></li>
                             <li><button class="modal-body-button"><font-awesome-icon class="icon-right" icon="paperclip"/>Attachment</button></li>
@@ -121,6 +123,8 @@ export default {
             labels: [],
             checkLists: [],
             controller: null,
+            showEditLabels: false,
+            data: null
         }
     },
     components:{
@@ -141,6 +145,12 @@ export default {
         },
         hide($event){
             this.show__ = false;
+            this.showMoreDetails = false;
+            this.showEditLabels = false;
+            this.detail = '';
+            this.comment = '';
+            this.labels = [];
+            this.data = null;
             //this.text = 'TestTestTestTestTestTest';
             if($event) $event.stopPropagation();
         },
@@ -154,6 +164,7 @@ export default {
             this.detail = data.description;
             this.listTitle = data.listTitle;
             this.labels = data.labels;
+            this.data = data;
         },
         addMoreDetails(detail){
             /* if(detail){
@@ -163,6 +174,29 @@ export default {
         },
         closeMoreDetails(){
             this.showMoreDetails = false;
+        },
+        openEditLabels(){
+            console.log('open')
+            this.showEditLabels = true;
+        },
+        closeEditLabels(){
+            this.showEditLabels = false;
+        },
+        onSelectLabel(label){
+            const index = this.labels.findIndex( l => l.id === label.id);
+            if(index >= 0){
+                this.labels.splice(index, 1);
+            } else {
+                this.labels.push(label);
+            }
+            this.$emit('save-card-labels', {card: {id: this.data.cardId, labels: this.labels}, list: {id: this.data.listId} } );
+        },
+        onSaveDescription(){
+            this.closeMoreDetails();
+            this.$emit('save-description', {data: this.data, detail: this.detail});
+        },
+        saveText(){
+            console.log("SAVE TEXT FROM MODAL");
         }
     },
     mounted: function(){
@@ -416,6 +450,11 @@ position: fixed;
 .left-icon{
     margin-left: 10px;
 }
+
+li{
+    position: relative;
+}
+
 /*TODO REMOVE*/
 .button.success{
     background-color: rgb(77, 190, 74);

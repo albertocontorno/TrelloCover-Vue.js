@@ -9,7 +9,11 @@
         <div>
             <AddNewContainer @add-list="onAddNewList($event)"/>
         </div>
-        <Modal/>
+        <Modal
+            @save-description="onSaveDescription($event)"
+            @label-selected-modal="onLabelSelectedFromModal($event)"
+            @save-card-labels="onSaveCardLabels($event)"
+        />
     </div>
 </template>
 
@@ -63,7 +67,7 @@ export default {
             this.boardService.upadateCardText(this.board.id, data.card, data.list);
         },
         onSaveCardLabels(data){
-            this.boardService.updateCardLabels(this.board.id, data.card, data.list);
+            this.boardService.updateCardLabels(this.board.id, data.card, data.list.id);
         },
         onAddNewList(name){
             let newList = {
@@ -106,6 +110,13 @@ export default {
                 this.addListListener(cards);
             });
             return lists;
+        },
+        onSaveDescription({data: cardInfo, detail}){
+            console.log("SAVE COMMENT", cardInfo, detail);
+            this.boardService.saveCardInfo(this.board.id, cardInfo, {description: detail});
+        },
+        onLabelSelectedFromModal(){
+            
         }
     },
     mounted(){
