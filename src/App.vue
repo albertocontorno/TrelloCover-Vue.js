@@ -88,8 +88,11 @@ label{
   margin-right: 5px;
 }
 
-.margin-t--5{
+.margin-t-5{
   margin-top: -5px;
+}
+.margin-l-5{
+  margin-left: 5px;
 }
 
 .icon-right{

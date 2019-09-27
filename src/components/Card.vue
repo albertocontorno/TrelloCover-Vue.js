@@ -78,6 +78,11 @@ export default {
         openAdvancedEdit(){
             //this.showAdvancedOption = true;
             //this.modal.open();
+            /**
+             * Quando si apre ci si iscrive anche al record sul db per ascoltare eventuali cambiamenti (tra cui la delete della card!!!)
+             * Bisogna tenere in synch le cards!
+             * Quando si chiude ci si disiscrive.
+             */
             this.iCard.cardInfo.get().then( c => {
                 let infos = Object.assign({}, this.iCard, c.data());
                 this.modalsService.toggleModal('cardAdvancedEditModal', infos);

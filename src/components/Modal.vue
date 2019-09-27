@@ -11,6 +11,7 @@
                             <div class="modal-header-text-sub">in lista {{listTitle}}</div>
                             <div class="modal-header-labels">
                                 <Label v-for="label of labels" :key="label.id" v-bind:text="label.text" v-bind:color="label.color"/>
+                                <div style="max-width: 250px; position: absolute; right: 0; left:0;"><EditLabels/></div>
                             </div>
                             <span class="modal-header-close" v-on:click="hide($event)"><font-awesome-icon icon="times"/></span> 
                         </div>
@@ -49,7 +50,7 @@
                             </div>
                         </div>
                         <div class="modal-body-left-row no-margin-bottom"  v-for="(checklist, index) of checkLists" :key="index">
-                            <div class="modal-body-left-row-left"><font-awesome-icon class="left-icon" icon="list"/></div>
+                            <div class="modal-body-left-row-left"><font-awesome-icon class="left-icon" icon="check"/></div>
                             <div class="modal-body-left-row-right">
                                 <CheckList :iItems="checklist.items" :iTitle="checklist.title"/>
                             </div>
@@ -101,6 +102,7 @@ import CheckList from './CheckList';
 import ActivityLog from './ActivityLog';
 import Button from './Button';
 import Label from './Label';
+import EditLabels from './EditLabels';
 
 export default {
     name: "Modal",
@@ -127,7 +129,8 @@ export default {
         ActivityLog,
         Button,
         Label,
-        CheckList
+        CheckList,
+        EditLabels
     },
     methods: {
         show(data){

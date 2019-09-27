@@ -2,8 +2,8 @@
     <div>
         <div class="row">
             <div class="col-xs-12">
-                <font-awesome-icon icon="check-square"/> {{iTitle}}
-                <button class="modal-body-button margin-t--5"><font-awesome-icon class="icon-right" icon="times"/>Delete</button>
+                {{iTitle}}
+                <Button label="Delete" classes="light-gray sm margin-t-5 float-right"><font-awesome-icon class="icon-right" icon="times"/></Button>
             </div>
         </div>
         <ProgressBar :iValue="progressValue" :iEndLabel="progressValue"/>
@@ -30,7 +30,8 @@
                     <font-awesome-icon icon="times" class="new-item-close" @click="showAddNewItem=false"/>
                 </template>
                 <template v-if="!showAddNewItem">
-                    <button class="modal-body-button float-left margin-tb-5" @click="onAddItem()"><font-awesome-icon class="icon-right" icon="plus"/>Add Item</button>
+                    <Button label="Add Item" classes="light-gray sm" @click="onAddItem()"><font-awesome-icon class="icon-right" icon="plus"/></Button>
+                    <Button label="Save" classes="success sm margin-l-5" @click="onEditItem(index)"/>
                 </template>
             </div>
         </div>

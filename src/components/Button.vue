@@ -25,6 +25,20 @@ button{
   box-shadow: 1px 1px 1px 0px #000000cc;
 }
 
+button.lg{
+  border-radius: 4px;
+  font-weight: bold;
+  padding: 10px 20px;
+  box-shadow: 1px 1px 1px 0px #000000cc;
+}
+
+button.sm{
+  border-radius: 4px;
+  font-weight: bold;
+  padding: 3px 8px;
+  box-shadow: 1px 1px 1px 0px #000000cc;
+}
+
 button:hover{
   cursor: pointer;
 }
@@ -121,6 +135,21 @@ button:disabled{
   background-color: rgb(247, 247, 247);
   border: 1px solid rgb(241, 241, 241);
   color: black;
+}
+
+.light-gray{
+    background: #e3e3e3;
+    border: 0;
+    border-bottom: 1px solid gray; 
+    border-radius: 3px;
+    outline: none;
+    /* float: right; */
+}
+
+.light-gray:hover{
+    background: lightgray;
+    cursor: pointer;
+    outline: none;
 }
 
 
