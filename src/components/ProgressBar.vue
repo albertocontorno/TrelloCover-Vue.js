@@ -44,8 +44,9 @@ export default {
 }
 
 .progressbar-bar-progress{
-    background-color: #00ca32;
+    background-color: #13b53b;
     width: 0;
+    transition: width 0.3s ease-in-out;
 }
 
 .progressbar-end-label{

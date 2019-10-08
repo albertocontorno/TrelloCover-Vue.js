@@ -40,16 +40,13 @@ export default {
             showOptionsButton: false,
             showEdit: false,
             id: 'card-' + nextId++,
-            labels: [],
             showAdvancedOption: false,
             modal: null,
             labelsSubscriptions: [],
         }
     },
     mounted: function(){
-        //this.labels = this.iCard.labels;
         this.labelsSubscriptions.push(this.labelsService.labels.subscribe(this.setupCardLabels));
-        //this.setupCardLabels();
         this.labelsSubscriptions.push(this.labelsService.eventDispatcher.subscribe( 'add-label', this.setupCardLabels ));
         this.labelsSubscriptions.push(this.labelsService.eventDispatcher.subscribe( 'delete-label', this.onDeleteLabel ));
     },
@@ -85,7 +82,7 @@ export default {
              */
             this.iCard.cardInfo.get().then( c => {
                 let infos = Object.assign({}, this.iCard, c.data());
-                this.modalsService.toggleModal('cardAdvancedEditModal', infos);
+                this.modalsService.toggleModal('cardAdvancedEditModal', infos, this.iCard.cardInfo);
             });
         },
         onSelectLabel(label){

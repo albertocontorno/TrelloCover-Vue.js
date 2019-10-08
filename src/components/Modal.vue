@@ -35,6 +35,15 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="modal-body-left-row no-margin-bottom"  v-for="(checklist, index) of checkLists" :key="index">
+                            <div class="modal-body-left-row-left"><font-awesome-icon class="left-icon" icon="check"/></div>
+                            <div class="modal-body-left-row-right">
+                                <CheckList :ICheckList="checklist"
+                                    @save-checkList="onSaveCheckList()"
+                                    @delete-checkList="onDeleteCheckList(index)"
+                                />
+                            </div>
+                        </div>
                         <div class="modal-body-left-row no-margin-bottom">
                             <div class="modal-body-left-row-left"><font-awesome-icon class="left-icon" icon="comment"/></div>
                             <div class="modal-body-left-row-right">
@@ -45,19 +54,24 @@
                             <div class="modal-body-left-row-left"><UserBadge :initials="user.initials" :username="user.username" /></div>
                             <div class="modal-body-left-row-right">
                                 <AutoresizeTextarea class="modal-comment" v-model="comment"/>
-                                <Button label="Save" classes="success"/>
-                            </div>
-                        </div>
-                        <div class="modal-body-left-row no-margin-bottom"  v-for="(checklist, index) of checkLists" :key="index">
-                            <div class="modal-body-left-row-left"><font-awesome-icon class="left-icon" icon="check"/></div>
-                            <div class="modal-body-left-row-right">
-                                <CheckList :iItems="checklist.items" :iTitle="checklist.title"/>
+                                <Button label="Save" classes="success" :disabled="(comment == '' || comment == null)"
+                                    @click="addComment()"
+                                />
                             </div>
                         </div>
                         <div class="modal-body-left-row no-margin-bottom">
                             <div class="modal-body-left-row-left"><font-awesome-icon class="left-icon" icon="list"/></div>
                             <div class="modal-body-left-row-right">
                                 Activities <span style="float:right"><button class="modal-body-button modal-hide-details">Hide Details</button></span>
+                            </div>
+                        </div>
+                        <div v-for="(comment, index) in comments" :key="comment.id" class="modal-body-left-row">
+                            <div class="modal-body-left-row-left"><UserBadge :initials="comment.user.initials" :username="comment.user.username" /></div>
+                            <div class="modal-body-left-row-right">
+                                <ActivityLog isComment="true" :Iactivity="comment" 
+                                    @save-comments="$emit('save-comments', data);"
+                                    @delete-comment="deleteComment(index)"
+                                />
                             </div>
                         </div>
                         <div v-for="a in [1,2,3]" class="modal-body-left-row">
@@ -75,7 +89,13 @@
                                 <EditLabels v-if="showEditLabels" :iLabels="labels" @closeLabels="closeEditLabels()" @selectLabel="onSelectLabel($event)"/>
                                 <button class="modal-body-button" @click="openEditLabels()"><font-awesome-icon class="icon-right" icon="tags"/>Labels</button>
                             </li>
-                            <li><button class="modal-body-button"><font-awesome-icon class="icon-right" icon="check-square"/>Checklist</button></li>
+                            <li>
+                                <AddCheckList v-if="showAddChecklist" 
+                                    @close-add-checklist="closeAddCheckList()"
+                                    @add-checkList="onAddCheckList($event)"
+                                />
+                                <button class="modal-body-button"  @click="openAddCheckList()"><font-awesome-icon class="icon-right" icon="check-square"/>Checklist</button>
+                            </li>
                             <li><button class="modal-body-button"><font-awesome-icon class="icon-right" icon="clock"/>Deadline</button></li>
                             <li><button class="modal-body-button"><font-awesome-icon class="icon-right" icon="paperclip"/>Attachment</button></li>
                         </ul>
@@ -105,6 +125,8 @@ import ActivityLog from './ActivityLog';
 import Button from './Button';
 import Label from './Label';
 import EditLabels from './EditLabels';
+import AddCheckList from './AddCheckList';
+import Comment from './Comment';
 
 export default {
     name: "Modal",
@@ -120,11 +142,14 @@ export default {
             showMoreDetails: false,
             detail: null,
             listTitle: '',
+            comments: [],
             labels: [],
             checkLists: [],
             controller: null,
             showEditLabels: false,
-            data: null
+            showAddChecklist: false,
+            data: null,
+            sub: null,
         }
     },
     components:{
@@ -134,7 +159,9 @@ export default {
         Button,
         Label,
         CheckList,
-        EditLabels
+        EditLabels,
+        AddCheckList,
+        Comment
     },
     methods: {
         show(data){
@@ -151,19 +178,25 @@ export default {
             this.comment = '';
             this.labels = [];
             this.data = null;
-            //this.text = 'TestTestTestTestTestTest';
+            if(this.sub) { this.sub(); }
             if($event) $event.stopPropagation();
         },
         intercept($event){
             if($event) $event.stopPropagation();
         },
-        toggle(data){
+        toggle(data, cardInfoRef){
             console.log("TOGGLE MODAL", data);
             this.show__ = !this.show__;
+            this.setup(data);
+            this.sub = cardInfoRef.onSnapshot( v => console.log("CARD INFO CHANGE ", v, this.setup(Object.assign(this.data, v.data()))));
+        },
+        setup(data){
             this.text = data.text;
             this.detail = data.description;
             this.listTitle = data.listTitle;
             this.labels = data.labels;
+            this.checkLists = data.checkLists;
+            this.comments = data.comments;
             this.data = data;
         },
         addMoreDetails(detail){
@@ -197,11 +230,46 @@ export default {
         },
         saveText(){
             console.log("SAVE TEXT FROM MODAL");
+        },
+        openAddCheckList(){
+            this.showAddChecklist = true;
+        },
+        closeAddCheckList(){
+            this.showAddChecklist = false;
+        },
+        onAddCheckList(checkList){
+            console.log('checkListTitle',checkList)
+            this.$emit('add-checkList', {checkList: checkList, cardInfo: this.data});
+        },
+        onSaveCheckList(){
+            this.$emit('save-checkList', this.data);
+        },
+        onDeleteCheckList(index){
+            this.data.checkLists.splice(index, 1);
+            this.$emit('save-checkList', this.data);
+        },
+        addComment(){
+            let newComment = {
+                date: new Date(),
+                user: {username: this.iUser.info.username, initials: this.iUser.info.initials},
+                text: this.comment,
+                edited: false,
+                id: ''
+            };
+            this.comment = null;
+            this.$emit('add-comment', {cardInfo: this.data, newComment});
+        },
+        saveComment(){
+            this.comment = null;
+            this.$emit('save-comments', this.data);
+        },
+        deleteComment(index){
+            this.$emit('delete-comment', {cardInfo: this.data, index});
         }
     },
     mounted: function(){
         this.controller = this.modalsService.registerModal('cardAdvancedEditModal', this);
-        this.checkLists.push(
+        /* this.checkLists.push(
             {items: [
                 {text: 'todo 1 asdasd adsdasd ', done: true},
                 {text: 'todo 2 asd dsd d adsdasd ', done: true},
@@ -213,7 +281,7 @@ export default {
         this.checkLists.push({items: [
                 {text: 'w 2321 eee adsdasd ', done: false},
                 {text: 'fef 21312 adsdasd ', done: true},
-            ], title: 'Test CheckList 2'});
+            ], title: 'Test CheckList 2'}); */
     },
     beforeDestroy(){
         this.modalsService.unregisterModal('cardAdvancedEditModal');
@@ -261,7 +329,7 @@ position: fixed;
 .modal-content{
     min-height: 25%;
     min-width: 500px;
-    max-width: 50%;
+    max-width: 800px;
     padding: 10px;
     margin: 0 auto;
     position: relative;
@@ -294,7 +362,7 @@ position: fixed;
 }
 
 .modal-header-text-sub{
-
+    font-size: 90%;
 }
 
 .modal-header-close{

@@ -4,6 +4,7 @@ export class ModalsService{
     constructor(){
         this.modals = {};
         this.activeModal = '';
+        this.cardInfoSubscription = null;
     }
 
     registerModal(name, modal){
@@ -37,9 +38,10 @@ export class ModalsService{
         }
     }
 
-    toggleModal(name, data) {
+    toggleModal(name, data, cardInfoRef) {
+        console.log("£", cardInfoRef)
         if (this.modals[name]) {
-            this.modals[name].toggle(data);
+            this.modals[name].toggle(data, cardInfoRef);
         }
     }
 }

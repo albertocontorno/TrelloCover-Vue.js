@@ -2,12 +2,17 @@
     <div>
         <div class="row">
             <div class="col-xs-12">
-                {{iTitle}}
-                <Button label="Delete" classes="light-gray sm margin-t-5 float-right"><font-awesome-icon class="icon-right" icon="times"/></Button>
+                <span v-if="!editingTitle" @click="editTitle()" class="title">{{ICheckList.title}}</span>
+                <template v-if="editingTitle">
+                    <Input  iAutofocus="true" v-model="newTitle" style="width: auto; display: inline-block; margin-left: 10px"/>
+                    <Button label="Save" classes="success" @click="onEditTitle()"/>
+                    <font-awesome-icon icon="times" class="new-item-close" @click="onCloseEditTitle()"/>
+                </template>
+                <Button label="Delete" classes="light-gray sm margin-t-5 float-right" @click="onDelete()"><font-awesome-icon class="icon-right" icon="times"/></Button>
             </div>
         </div>
         <ProgressBar :iValue="progressValue" :iEndLabel="progressValue"/>
-        <div class="row" v-for="(item, index) of items" :key="index">
+        <div class="row" v-for="(item, index) of ICheckList.items" :key="index">
             <div class="col-xs">
                 <font-awesome-icon 
                     class="clickable"
@@ -15,7 +20,7 @@
                     @click="toggleCheck(index)"/> 
                     <span v-if="!item.editing" class="item-text"  @click="editItem(index)">{{item.item.text}}</span>
                     <template v-if="item.editing">
-                        <Input  iAutofocus="true" v-model="item.item.text" style="width: auto; display: inline-block; margin-left: 10px"/>
+                        <Input  iAutofocus="true" v-model="newText" style="width: auto; display: inline-block; margin-left: 10px"/>
                         <Button label="Save" classes="success" @click="onEditItem(index)"/>
                         <font-awesome-icon icon="times" class="new-item-close" @click="onCloseEditItem(index)"/>
                     </template>
@@ -26,12 +31,11 @@
             <div class="col-xs">
                 <template v-if="showAddNewItem">
                     <AutoresizeTextarea class="modal-comment" v-model="newItemText"/>
-                    <Button label="Save" classes="success" @click="onSaveItem()"/>
-                    <font-awesome-icon icon="times" class="new-item-close" @click="showAddNewItem=false"/>
+                    <Button label="Add" classes="success" @click="onSaveItem()"/>
+                    <font-awesome-icon icon="times" class="new-item-close" @click="onCloseAddNewItem()"/>
                 </template>
                 <template v-if="!showAddNewItem">
                     <Button label="Add Item" classes="light-gray sm" @click="onAddItem()"><font-awesome-icon class="icon-right" icon="plus"/></Button>
-                    <Button label="Save" classes="success sm margin-l-5" @click="onEditItem(index)"/>
                 </template>
             </div>
         </div>
@@ -43,6 +47,7 @@ import ProgressBar from './ProgressBar';
 import Button from './Button';
 import AutoresizeTextarea from './AutoresizeTextarea';
 import Input from './Input';
+
 export default {
     name: 'checklist',
     components: {
@@ -51,58 +56,84 @@ export default {
         AutoresizeTextarea,
         Input
     },
-    props: ['iItems', 'iTitle'],
+    props: ['ICheckList'],
     data(){
         return {
             showAddNewItem: false,
+            editingTitle: false,
+            newTitle: null,
+            newText: null,
             newItemText: null,
-            items: [],
-            progressValue: '0%'
+        }
+    },
+    computed:{
+        progressValue: function(){
+            if(this.ICheckList.items.length <= 0){ return '0%'; }
+            let doneCounter = this.ICheckList.items.filter( item => item.item.done );
+            return Math.round((doneCounter.length / this.ICheckList.items.length)*100) + '%';
         }
     },
     mounted(){
-        this.iItems.forEach( item => {
-            this.items.push({item, editing: false});
-        });
-        this.calculatePercentage();
     },
     methods: {
         onAddItem(){
             this.showAddNewItem = true;
         },
+        onCloseAddNewItem(){
+            this.showAddNewItem = false;
+            this.newItemText = null;
+        },
         onSaveItem(){
             let newItem = {item:{text: this.newItemText, done: false}, editing: false};
-            this.items.push(newItem);
-            this.$emit('addItemChecklist', newItem);
+            this.ICheckList.items.push(newItem);
             this.newItemText = '';
             this.showAddNewItem = false;
-            this.calculatePercentage();
+            this.onSaveCheckList();
         },
         toggleCheck(index){
-            if(this.items[index]){
-                this.items[index].item.done = !this.items[index].item.done;
-                this.calculatePercentage();
+            if(this.ICheckList.items[index]){
+                let item = this.ICheckList.items[index];
+                item.item.done = !item.item.done;
+                this.onSaveCheckList();
             }
         },
         editItem(index){
-            this.items.forEach( item => item.editing = false );
-            if(this.items[index]){
-                this.items[index].editing = true;
+            this.ICheckList.items.forEach( item => item.editing = false );
+            if(this.ICheckList.items[index]){
+                this.newText = this.ICheckList.items[index].item.text;
+                this.ICheckList.items[index].editing = true;
             }
         },
         onEditItem(index){
-            if(this.items[index]){
-                this.items[index].editing = false;
+            if(this.ICheckList.items[index]){
+                this.ICheckList.items[index].editing = false;
+                this.ICheckList.items[index].item.text = this.newText;
+                this.onSaveCheckList();
             }
         },
         onCloseEditItem(index){
-            if(this.items[index]){
-                this.items[index].editing = false;
+            if(this.ICheckList.items[index]){
+                this.ICheckList.items[index].editing = false;
             }
         },
-        calculatePercentage(){
-            let doneCounter = this.items.filter( item => item.item.done );
-            this.progressValue = Math.round((doneCounter.length / this.items.length)*100) + '%';
+        editTitle(){
+            this.newTitle = this.ICheckList.title;
+            this.editingTitle = true;
+        },
+        onCloseEditTitle(){
+            this.editingTitle = false;
+        },
+        onEditTitle(){
+            this.ICheckList.title = this.newTitle;
+            this.newTitle = null;
+            this.editingTitle = false;
+            this.onSaveCheckList();
+        },
+        onSaveCheckList(){
+            this.$emit('save-checkList');
+        },
+        onDelete(){
+            this.$emit('delete-checkList');
         }
     }
 }
@@ -111,6 +142,10 @@ export default {
 <style scoped>
 .col-xs-12, .col-xs{
     padding: 0;
+}
+
+.title{
+    cursor: pointer;
 }
 
 .modal-body-button{

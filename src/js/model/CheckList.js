@@ -4,11 +4,12 @@ export class CheckList{
      *Creates an instance of CheckList.
      * @param {string} title
      * @param {CheckListItem[]} items
+     * @param {}
      * @memberof CheckList
      */
     constructor(title, items){
         this.title = title;
-        this.items = items;
+        this.items = items || [];
     }
 }
 

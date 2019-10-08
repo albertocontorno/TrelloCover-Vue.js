@@ -1,5 +1,5 @@
 <template>
-    <div class="card-option-edit-labels" ref="test">
+    <div class="card-option-edit-labels" ref="modalBody">
         <div class="card-option-edit-labels-header">
             <span v-if="addLabel || modifyLabel" class="back-arrow" @click="onCloseAddNewLabel()"><font-awesome-icon icon="arrow-left"/></span>
             <h4>Edit Labels</h4>
@@ -74,7 +74,7 @@ export default {
     },
     methods:{
         onResize: function(){
-            var rect = this.$refs['test'].getBoundingClientRect();
+            var rect = this.$refs['modalBody'].getBoundingClientRect();
             let style = {maxHeight: (window.innerHeight - rect.top - 55) + 'px'};
             this.bodyStyle = style;
         },

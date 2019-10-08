@@ -10,9 +10,15 @@
             <AddNewContainer @add-list="onAddNewList($event)"/>
         </div>
         <Modal
+            :iUser="authService.user"
             @save-description="onSaveDescription($event)"
             @label-selected-modal="onLabelSelectedFromModal($event)"
             @save-card-labels="onSaveCardLabels($event)"
+            @add-checkList="onAddCheckList($event)"
+            @save-checkList="onSaveCheckList($event)"
+            @add-comment="onAddComment($event)"
+            @save-comments="onSaveComments($event)"
+            @delete-comment="onDeleteComment($event)"
         />
     </div>
 </template>
@@ -22,6 +28,8 @@ import CardsContainer from '../components/CardsContainer'
 import AddNewContainer from '../components/AddNewContainer';
 import Modal from "../components/Modal";
 import { LabelService } from  '../js/services/labels.service';
+import { CardService } from '../js/services/card.service';
+
 export default {
     name: 'Board',
     components: {
@@ -31,21 +39,22 @@ export default {
     },
     provide: function() {
         return {
-            labelsService: this.labelsService
+            labelsService: this.labelsService,
+            cardService: this.cardService
         }
     },
-    inject: ['boardService', 'authService'],
+    inject: ['boardService', 'authService', 'utilsService'],
     data(){
         return {
             cardsContainers: [],
             labelsService: new LabelService(this.boardService.db, this.boardService.vm),
+            cardService: new CardService(this.boardService.db, this.utilsService),
             labels: [],
             board: null
         }
     },
     methods:{
         onAddCard(data){
-            console.log("ADD CARD: ", data);
             let container = this.cardsContainers[data.container];
             let newCard = {
                 id: container.cards.length,
@@ -53,7 +62,6 @@ export default {
                 text: data.text
             };
             container.cards.push(newCard);
-            //this.boardService.updateBoard({lists:this.board.lists, id: this.board.id}, this.authService.user.info.uid);
             this.boardService.addCardToList(
                 data.container, 
                 newCard,
@@ -63,7 +71,6 @@ export default {
             );
         },
         onSaveCard(data){
-            console.log("UPDATE CARD", data);
             this.boardService.upadateCardText(this.board.id, data.card, data.list);
         },
         onSaveCardLabels(data){
@@ -83,9 +90,7 @@ export default {
         },
         addListListener(cards){
             this.boardService.currentBoardSubcriptions.push( cards.query.onSnapshot( l => {
-                //console.log("CARDS SNAPSHOT", l, l.docChanges())
                 l.docChanges().forEach( c =>{
-                        //console.log("SINGLE CARD SNAP", c, c.doc, c.doc.data())
                         const changedCard = c.doc.data();
                         if(!this.board.lists[changedCard.listId]){
                             this.board.lists[changedCard.listId] = {cards: []};
@@ -112,17 +117,34 @@ export default {
             return lists;
         },
         onSaveDescription({data: cardInfo, detail}){
-            console.log("SAVE COMMENT", cardInfo, detail);
             this.boardService.saveCardInfo(this.board.id, cardInfo, {description: detail});
         },
         onLabelSelectedFromModal(){
             
+        },
+        onAddCheckList({checkList, cardInfo}){
+            checkList.id = this.utilsService.uuidv4();
+            cardInfo.checkLists.push(Object.assign({}, checkList));
+            this.cardService.saveCardCheckLists(this.board.id, cardInfo.id, cardInfo.checkLists);
+            
+        },
+        onSaveCheckList(cardInfo){
+            this.cardService.saveCardCheckLists(this.board.id, cardInfo.id, cardInfo.checkLists);
+        },
+        onAddComment(data){
+             this.cardService.addCardComment(this.board.id, data.cardInfo.id, data.cardInfo.comments, data.newComment);
+        },
+        onSaveComments(cardInfo){
+            this.cardService.saveCardComments(this.board.id, cardInfo.id, cardInfo.comments);
+        },
+        onDeleteComment(data){
+            this.cardService.deleteCardComment(this.board.id, data.cardInfo.id, data.cardInfo.comments, data.index)
         }
     },
     mounted(){
         //TODO RENDERE SYNCH DATI E DB!
         let id = this.$route.params.id;
-        console.log("open ", id);
+
         this.boardService.readBoard(id, this.authService.user.info.uid).then( async b => {
             if(b){
                 this.board = {
@@ -134,7 +156,6 @@ export default {
 
                 this.boardService.currentBoardSubcriptions.push(
                     this.boardService.currentBoardRef.ref.onSnapshot((doc) => {
-                        console.log("BOARD CHANGED!", doc.data());
                         //Labels
                         this.labelsService.labels.values = doc.data().labels;
                         this.labelsService.update();
@@ -163,7 +184,6 @@ export default {
                     })
                 );
                 
-                //this.$router.push('/board/'+id);
                 this.cardsContainers = b.lists;
                 this.labelsService.labels.values = b.labels;
                 this.labelsService.update();
@@ -182,7 +202,6 @@ export default {
 .board{
   display: flex;
   overflow-x: auto;
-  /* flex-grow: 1; */
   flex-direction: row;
   position: absolute;
   top: 10px;

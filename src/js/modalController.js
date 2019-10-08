@@ -24,10 +24,10 @@ export class ModalController{
         }
     }
 
-    toggle(data){
+    toggle(data, cardInfoRef){
         this.isOpen = !this.isOpen;
         if (this.modal) {
-            this.modal.toggle(data);
+            this.modal.toggle(data, cardInfoRef);
         }
     }
 
