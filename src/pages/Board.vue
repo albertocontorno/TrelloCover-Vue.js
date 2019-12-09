@@ -1,4 +1,6 @@
 <template>
+    <span>
+    <div class="board-nav"><BoardNav :iBoard="board"/></div>
     <div class="board">
         <CardsContainer v-for="(container, index) in cardsContainers" :key="container.id" :iContainer="container" :index="index"
             @addCard="onAddCard($event)"
@@ -21,18 +23,22 @@
             @delete-comment="onDeleteComment($event)"
         />
     </div>
+    </span>
 </template>
 
 <script>
 import CardsContainer from '../components/CardsContainer'
 import AddNewContainer from '../components/AddNewContainer';
-import Modal from "../components/Modal";
+import Modal from '../components/Modal';
+import BoardNav from '../components/BoardNav';
 import { LabelService } from  '../js/services/labels.service';
 import { CardService } from '../js/services/card.service';
+import { UsersService } from '../js/services/users.service';
 
 export default {
     name: 'Board',
     components: {
+        BoardNav,
         CardsContainer,
         AddNewContainer,
         Modal
@@ -40,7 +46,8 @@ export default {
     provide: function() {
         return {
             labelsService: this.labelsService,
-            cardService: this.cardService
+            cardService: this.cardService,
+            usersService: this.usersService
         }
     },
     inject: ['boardService', 'authService', 'utilsService'],
@@ -49,6 +56,7 @@ export default {
             cardsContainers: [],
             labelsService: new LabelService(this.boardService.db, this.boardService.vm),
             cardService: new CardService(this.boardService.db, this.utilsService),
+            usersService: new UsersService(this.boardService.db, this.boardService.db2),
             labels: [],
             board: null
         }
@@ -125,8 +133,7 @@ export default {
         onAddCheckList({checkList, cardInfo}){
             checkList.id = this.utilsService.uuidv4();
             cardInfo.checkLists.push(Object.assign({}, checkList));
-            this.cardService.saveCardCheckLists(this.board.id, cardInfo.id, cardInfo.checkLists);
-            
+            this.cardService.saveCardCheckLists(this.board.id, cardInfo.id, cardInfo.checkLists);  
         },
         onSaveCheckList(cardInfo){
             this.cardService.saveCardCheckLists(this.board.id, cardInfo.id, cardInfo.checkLists);
@@ -145,13 +152,16 @@ export default {
         //TODO RENDERE SYNCH DATI E DB!
         let id = this.$route.params.id;
 
+        this.usersService.getUsers()
+
         this.boardService.readBoard(id, this.authService.user.info.uid).then( async b => {
             if(b){
                 this.board = {
                     id: b.id,
                     lists: await this.retrieveCards(b.id, b.lists),
                     labels: b.labels,
-                    members: b.members
+                    members: b.members,
+                    title: b.title
                 };
 
                 this.boardService.currentBoardSubcriptions.push(
@@ -199,15 +209,20 @@ export default {
 </script>
 
 <style scoped>
+.board-nav{
+    height: 40px;
+}
+
 .board{
   display: flex;
   overflow-x: auto;
   flex-direction: row;
   position: absolute;
-  top: 10px;
+  top: 45px;
   left: 0;
   right: 0;
   bottom: 0;
+  background-color: #1976d2;
 }
 </style>
 

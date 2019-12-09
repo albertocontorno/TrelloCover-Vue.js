@@ -13,9 +13,13 @@ export default {
 </script>
 
 <style scoped>
+a{
+    color: white;
+}
+
 .navbar-container{
     padding: 5px 10px;
-    background-color: green;
+    background-color: #1949a5;
     position: static;
     font-weight: bold;
     color: black;

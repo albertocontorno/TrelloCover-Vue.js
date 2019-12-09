@@ -15,12 +15,12 @@ export default {
 
 <style scoped>
 .user-badge-circle{
-    min-width: 30px;
-    min-height: 30px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     border: 1px solid #ccc;
     background-color: lightgray;
-    display: block;
+    display: inline-block;
     text-align: center;
 }
 

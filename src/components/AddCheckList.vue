@@ -33,7 +33,7 @@ export default {
         return {
             bodyStyle: null,
             onResizeSubscription: null,
-            checkListTitle: ''
+            checkListTitle: null
         }
     },
     methods: {

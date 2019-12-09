@@ -8,7 +8,7 @@ import {
    faPen, faTags, faUser, faArrowRight, faClone, faTrash, faEllipsisH, faTimes,
    faAlignLeft, faComment, faList, faChalkboard, faCheckSquare, faClock, faPaperclip,
    faCopy, faEye, faArchive, faShareAlt, faPlus, faCheck, faArrowLeft, faSearchLocation, 
-   faLocationArrow, faCogs, faSquare
+   faLocationArrow, faCogs, faSquare, faSearch
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { AuthService } from "./js/services/auth.service";
@@ -41,6 +41,7 @@ library.add(faLocationArrow);
 library.add(faSearchLocation);
 library.add(faCogs);
 library.add(faSquare);
+library.add(faSearch);
 
 Vue.component("font-awesome-icon", FontAwesomeIcon);
 
@@ -59,6 +60,7 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const db2 = firebase.database();
 
 new Vue({
   router,
@@ -74,8 +76,9 @@ new Vue({
   
   data:{
     db: db,
-    authService: new AuthService(db),
-    boardService: new BoardService(db),
+    db2: db2,
+    authService: new AuthService(db, db2),
+    boardService: new BoardService(db, db2),
     utilsService: new UtilsService(),
     modalsService: new ModalsService()
   },

@@ -2,10 +2,13 @@ import firebase from "firebase";
 import {CardInfo} from "../model/CardInfo";
 export class BoardService{
 
-    constructor(db) {
+    constructor(db, db2) {
         if (!db) this.db = firebase.firestone();
+        if(!db2) this.db2 = firebase.database();
+
         this.currentBoardRef = null;
         this.db = db;
+        this.db2 = db2;
         this.utils = null;
         this.currentBoardSubcriptions = [];
     }
@@ -162,6 +165,5 @@ export class BoardService{
     -Cards can be pointed individually direcly, to update text or labels, or delete them
     -Cards info are still pointable individually and directly on demand (to retrieve and to update!).
     */
-
 
 }

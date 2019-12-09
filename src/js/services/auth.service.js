@@ -13,10 +13,11 @@ import Vue from "vue";
 } */
 
 export class AuthService{
-    constructor(db){
+    constructor(db, db2){
         this.user = null;
         if(!db) this.db = firebase.firestone();
         this.db = db;
+        this.db2 = db2;
     }
 
     signup(email, password){

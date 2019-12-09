@@ -74,17 +74,20 @@
                                 />
                             </div>
                         </div>
-                        <div v-for="a in [1,2,3]" class="modal-body-left-row">
+                        <!-- <div v-for="a in [1,2,3]" class="modal-body-left-row">
                             <div class="modal-body-left-row-left"><UserBadge :initials="user.initials" :username="user.username" /></div>
                             <div class="modal-body-left-row-right">
                                 <ActivityLog/>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                     <div class="modal-body-right-col">
                         <div class="modal-body-buttons-title first">ADD TO CARD</div>
                         <ul class="modal-body-buttons-container">
-                            <li><button class="modal-body-button"><font-awesome-icon class="icon-right" icon="user"/>Members</button></li>
+                            <li>
+                                <EditMembers v-if="showEditMembers" @close-edit-members="closeEditMembers()" iEdit="true" :iMembers="data.members"/>
+                                <button class="modal-body-button" @click="openEditMembers()"><font-awesome-icon class="icon-right" icon="user"/>Members</button>
+                            </li>
                             <li>
                                 <EditLabels v-if="showEditLabels" :iLabels="labels" @closeLabels="closeEditLabels()" @selectLabel="onSelectLabel($event)"/>
                                 <button class="modal-body-button" @click="openEditLabels()"><font-awesome-icon class="icon-right" icon="tags"/>Labels</button>
@@ -127,6 +130,7 @@ import Label from './Label';
 import EditLabels from './EditLabels';
 import AddCheckList from './AddCheckList';
 import Comment from './Comment';
+import EditMembers from './EditMembers';
 
 export default {
     name: "Modal",
@@ -148,6 +152,7 @@ export default {
             controller: null,
             showEditLabels: false,
             showAddChecklist: false,
+            showEditMembers: false,
             data: null,
             sub: null,
         }
@@ -161,12 +166,11 @@ export default {
         CheckList,
         EditLabels,
         AddCheckList,
+        EditMembers,
         Comment
     },
     methods: {
         show(data){
-            //this.textarea_listener();
-            console.log("OPEN MODAL", data);
             this.show__ = true;
             this.detail = data.description;
         },
@@ -200,9 +204,6 @@ export default {
             this.data = data;
         },
         addMoreDetails(detail){
-            /* if(detail){
-                this.detail = detail;
-            } */
             this.showMoreDetails = true;
         },
         closeMoreDetails(){
@@ -238,7 +239,6 @@ export default {
             this.showAddChecklist = false;
         },
         onAddCheckList(checkList){
-            console.log('checkListTitle',checkList)
             this.$emit('add-checkList', {checkList: checkList, cardInfo: this.data});
         },
         onSaveCheckList(){
@@ -265,23 +265,16 @@ export default {
         },
         deleteComment(index){
             this.$emit('delete-comment', {cardInfo: this.data, index});
+        },
+        openEditMembers(){
+            this.showEditMembers = true;
+        },
+        closeEditMembers(){
+            this.showEditMembers = false;
         }
     },
     mounted: function(){
         this.controller = this.modalsService.registerModal('cardAdvancedEditModal', this);
-        /* this.checkLists.push(
-            {items: [
-                {text: 'todo 1 asdasd adsdasd ', done: true},
-                {text: 'todo 2 asd dsd d adsdasd ', done: true},
-                {text: 'todo 3 353 adsd fdfd3sd ', done: false},
-                {text: 'todo 4 sdg4 adsdf asd ', done: true},
-                {text: 'todo 4 sdg4 adsdf asd ', done: false},
-            ], title: 'Test CheckList 1'}
-        );
-        this.checkLists.push({items: [
-                {text: 'w 2321 eee adsdasd ', done: false},
-                {text: 'fef 21312 adsdasd ', done: true},
-            ], title: 'Test CheckList 2'}); */
     },
     beforeDestroy(){
         this.modalsService.unregisterModal('cardAdvancedEditModal');

@@ -26,17 +26,13 @@ button{
 }
 
 button.lg{
-  border-radius: 4px;
   font-weight: bold;
   padding: 10px 20px;
-  box-shadow: 1px 1px 1px 0px #000000cc;
 }
 
 button.sm{
-  border-radius: 4px;
   font-weight: bold;
   padding: 3px 8px;
-  box-shadow: 1px 1px 1px 0px #000000cc;
 }
 
 button:hover{
@@ -152,5 +148,12 @@ button:disabled{
     outline: none;
 }
 
+.no-border{
+  border: none;
+}
+
+.no-shadow{
+  box-shadow: none;
+}
 
 </style>

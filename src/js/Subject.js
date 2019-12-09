@@ -18,6 +18,10 @@ export class Subject{
         this.subscribers.forEach( subFn => subFn(this.values) );
     }
 
+    notifyValue(value){
+        this.subscribers.forEach( subFn => subFn(value) );
+    }
+
     unsubscribe(fn){
         let index = this.subscribers.findIndex( subFn => subFn === fn );
         if (index > -1){
